@@ -1,0 +1,13 @@
+# Python & pytest cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Blender backup files
+*.blend1
+*.blend2
+
+# OS metadata
+.DS_Store
+Thumbs.db

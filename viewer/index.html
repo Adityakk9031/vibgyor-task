@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vibgyor — Interactive 3D Architectural Viewer</title>
+  <style>
+    :root {
+      --bg-panel: rgba(18, 22, 24, 0.88);
+      --border-panel: rgba(255, 255, 255, 0.12);
+      --accent-orange: #d97736;
+      --accent-sage: #7c9a82;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #111518; color: var(--text-main);
+    }
+    #canvas-container { width: 100%; height: 100%; position: relative; }
+
+    /* Top Header Bar */
+    .header-bar {
+      position: absolute; top: 20px; left: 20px; z-index: 10;
+      background: var(--bg-panel); backdrop-filter: blur(12px);
+      border: 1px solid var(--border-panel); border-radius: 12px;
+      padding: 16px 22px; max-width: 380px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+    .header-tag {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent-orange); margin-bottom: 4px;
+    }
+    .header-title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+    .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+    /* Right Control & Floor Inspector Panel */
+    .side-panel {
+      position: absolute; top: 20px; right: 20px; z-index: 10;
+      width: 340px; max-height: calc(100vh - 40px); overflow-y: auto;
+      background: var(--bg-panel); backdrop-filter: blur(12px);
+      border: 1px solid var(--border-panel); border-radius: 12px;
+      padding: 18px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px;
+    }
+
+    /* Camera & Lighting Buttons */
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn {
+      background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-panel);
+      color: var(--text-main); padding: 9px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+      text-align: center;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255,255,255,0.28); }
+    .btn.active {
+      background: var(--accent-orange); border-color: var(--accent-orange); color: #fff;
+    }
+
+    /* Floor Selector Stack */
+    .floor-stack { display: flex; flex-direction: column; gap: 5px; }
+    .floor-btn {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-panel);
+      color: var(--text-main); padding: 8px 12px; border-radius: 7px;
+      font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+    }
+    .floor-btn:hover { background: rgba(255, 255, 255, 0.12); }
+    .floor-btn.active {
+      background: rgba(217, 119, 54, 0.24); border-color: var(--accent-orange);
+    }
+    .floor-badges { display: flex; gap: 5px; }
+    .badge {
+      font-size: 10.5px; padding: 2px 6px; border-radius: 4px; font-weight: 700;
+    }
+    .badge-a { background: rgba(217, 119, 54, 0.28); color: #ffad75; border: 1px solid rgba(217, 119, 54, 0.5); }
+    .badge-b { background: rgba(124, 154, 130, 0.28); color: #b5d6bc; border: 1px solid rgba(124, 154, 130, 0.5); }
+
+    /* Selected Floor Details Card */
+    .info-card {
+      background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-panel);
+      border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .info-title { font-size: 16px; font-weight: 700; color: #fff; }
+    .flat-box {
+      padding: 10px; border-radius: 7px; font-size: 12px; line-height: 1.45;
+    }
+    .flat-box.type-a {
+      background: rgba(217, 119, 54, 0.15); border-left: 3px solid var(--accent-orange);
+    }
+    .flat-box.type-b {
+      background: rgba(124, 154, 130, 0.15); border-left: 3px solid var(--accent-sage);
+    }
+    .flat-head { font-weight: 700; font-size: 13px; margin-bottom: 3px; color: #fff; }
+
+    /* Bottom Left Status / FPS / Instructions */
+    .footer-bar {
+      position: absolute; bottom: 20px; left: 20px; z-index: 10;
+      background: var(--bg-panel); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-panel); border-radius: 10px;
+      padding: 10px 16px; font-size: 12px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .fps-badge { color: #6ee7b7; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    #loading-overlay {
+      position: absolute; inset: 0; z-index: 50;
+      background: rgba(15, 18, 20, 0.92);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; transition: opacity 0.35s ease;
+    }
+    .spinner {
+      width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: var(--accent-orange); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="canvas-container">
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <div id="loading-text" style="font-size:14px; font-weight:600;">Loading Vibgyor 3D Model (.glb) & HDRI Sky...</div>
+    </div>
+
+    <div class="header-bar">
+      <div class="header-tag">Prahlad Nagar · Ahmedabad</div>
+      <div class="header-title">VIBGYOR</div>
+      <div class="header-sub">
+        Generated directly from <code>SUBMISSION - 04.dxf</code><br/>
+        Stilt Parking · 7 Residential Floors (2 × 4BHK/floor) · Terrace
+      </div>
+    </div>
+
+    <div class="side-panel">
+      <div>
+        <div class="section-label">Time of Day & Lighting</div>
+        <div class="btn-grid">
+          <button class="btn active" id="btn-mode-day">Daylight (HDRI + Sun)</button>
+          <button class="btn" id="btn-mode-dusk">Dusk (Warm Lights)</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Camera Presets</div>
+        <div class="btn-grid">
+          <button class="btn" data-cam="eye">1 · Eye Level</button>
+          <button class="btn" data-cam="corner">2 · Front Corner</button>
+          <button class="btn" data-cam="aerial">3 · Aerial 45°</button>
+          <button class="btn" data-cam="entrance">4 · Entrance</button>
+        </div>
+        <button class="btn" data-cam="interior" style="width:100%; margin-top:8px;">Bonus · Floor 1 Type A Drawing Room</button>
+      </div>
+
+      <div>
+        <div class="section-label" style="display:flex; justify-content:space-between;">
+          <span>Click Floor on Model or Below</span>
+          <a href="#" id="btn-clear-sel" style="color:var(--accent-orange); text-decoration:none; font-size:11px;">Reset</a>
+        </div>
+        <div class="floor-stack" id="floor-list"></div>
+      </div>
+
+      <div class="info-card" id="floor-info-card">
+        <div class="info-title" id="info-floor-title">All Floors Overview</div>
+        <div style="font-size:12px; color:var(--text-muted);" id="info-floor-sub">
+          Click any floor directly on the 3D building (or select a floor button above) to highlight it and inspect its Type A and Type B 4BHK apartments.
+        </div>
+        <div id="info-flats-container" style="display:none; flex-direction:column; gap:8px;">
+          <div class="flat-box type-a">
+            <div class="flat-head" id="flat-a-title">Flat 101 · Type A (Front)</div>
+            <div>4 BHK + Servant Room · Facing 18.0 m Wide Road<br/>RERA Carpet Area: <strong>160.05 sq.m</strong> · Drawing: 6.53 × 3.65 m</div>
+          </div>
+          <div class="flat-box type-b">
+            <div class="flat-head" id="flat-b-title">Flat 102 · Type B (Rear)</div>
+            <div>4 BHK + Servant Room · North Wing<br/>RERA Carpet Area: <strong>143.18 sq.m</strong> · Drawing: 6.31 × 3.65 m</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bar">
+      <span><strong class="fps-badge" id="fps-counter">60 FPS</strong></span>
+      <span>Left-drag: Orbit · Right-drag: Pan · Scroll: Zoom · Click Building: Select Floor & Flats</span>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+
+    const container = document.getElementById('canvas-container');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    // 1. Renderer with ACESFilmic / AgX Tone Mapping & Soft Shadows
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.AgXToneMapping || THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x9ec2df);
+
+    // Note: Blender glTF export uses Y-up where (X_b, Y_b, Z_b) -> (X_b, Z_b, -Y_b)
+    // Building footprint in Blender is X in [0, 13.1], Y in [0, 38.7], Z in [0, 29]
+    // So in Three.js Y-up: X in [0, 13.1], Y (height) in [0, 29], Z in [-38.7, 0]
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.2, 400);
+    camera.position.set(-14, 10, 22);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.target.set(6.5, 11.5, -15.0);
+    controls.maxPolarAngle = Math.PI * 0.495;
+    controls.minDistance = 3;
+    controls.maxDistance = 140;
+    controls.update();
+
+    // 2. Sun & Fill Lights with Shadows
+    const sunLight = new THREE.DirectionalLight(0xfff5e4, 3.2);
+    sunLight.position.set(28, 42, 32);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 5;
+    sunLight.shadow.camera.far = 140;
+    const d = 38;
+    sunLight.shadow.camera.left = -d;
+    sunLight.shadow.camera.right = d;
+    sunLight.shadow.camera.top = d;
+    sunLight.shadow.camera.bottom = -d;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x3f3f46, 0.85);
+    scene.add(hemiLight);
+
+    // Dusk warm interior point lights group
+    const duskLightsGroup = new THREE.Group();
+    duskLightsGroup.visible = false;
+    for (let fl = 1; fl <= 7; fl++) {
+      const yHeight = 3.30 + (fl - 1) * 3.05 + 2.1;
+      const pl1 = new THREE.PointLight(0xffa952, 18, 12, 1.5);
+      pl1.position.set(8.5, yHeight, -4.5);
+      const pl2 = new THREE.PointLight(0xffa952, 18, 12, 1.5);
+      pl2.position.set(4.5, yHeight, -6.2);
+      duskLightsGroup.add(pl1, pl2);
+    }
+    const canopyLight = new THREE.PointLight(0xffb464, 28, 16, 1.4);
+    canopyLight.position.set(1.5, 2.7, -0.5);
+    duskLightsGroup.add(canopyLight);
+    scene.add(duskLightsGroup);
+
+    // 3. Load Poly Haven HDRI for realistic reflections & sky
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load(
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloppenheim_06_puresky_1k.hdr',
+      (texture) => {
+        texture.mapping = THREE.EquirectangularReflectionMapping;
+        scene.environment = texture;
+        scene.background = texture;
+        scene.backgroundIntensity = 0.85;
+        scene.environmentIntensity = 0.9;
+      },
+      undefined,
+      () => { /* fallback procedural sky background stays active if offline */ }
+    );
+
+    // 4. Floor & Flat Metadata Registry
+    const FLOORS_META = [
+      { index: 8, label: 'Terrace & Cabin', badge: 'Roof', isRes: false, desc: 'Open Terrace, Parapet (1.15 m), Stair Cabin (+3.0 m) & Overhead Water Tank (+2.4 m).' },
+      { index: 7, label: '7th Floor', isRes: true },
+      { index: 6, label: '6th Floor', isRes: true },
+      { index: 5, label: '5th Floor', isRes: true },
+      { index: 4, label: '4th Floor', isRes: true },
+      { index: 3, label: '3rd Floor', isRes: true },
+      { index: 2, label: '2nd Floor', isRes: true },
+      { index: 1, label: '1st Floor', isRes: true },
+      { index: 0, label: 'Ground (Stilt)', badge: 'Parking', isRes: false, desc: 'Hollow Plinth Stilt Parking (3.30 m height), Entrance Foyer, 2 Lifts & Core Staircase.' }
+    ];
+
+    const floorMeshes = new Map(); // floorIndex -> Array of Mesh
+    const allBuildingMeshes = [];
+    let selectedFloor = null;
+
+    // Build Floor Selector UI
+    const floorListEl = document.getElementById('floor-list');
+    FLOORS_META.forEach((f) => {
+      floorMeshes.set(f.index, []);
+      const btn = document.createElement('button');
+      btn.className = 'floor-btn';
+      btn.dataset.floor = f.index;
+      if (f.isRes) {
+        btn.innerHTML = `
+          <span>${f.label}</span>
+          <span class="floor-badges">
+            <span class="badge badge-a">${f.index}01 · Type A</span>
+            <span class="badge badge-b">${f.index}02 · Type B</span>
+          </span>
+        `;
+      } else {
+        btn.innerHTML = `
+          <span>${f.label}</span>
+          <span class="floor-badges"><span class="badge" style="background:rgba(255,255,255,0.12);">${f.badge}</span></span>
+        `;
+      }
+      btn.addEventListener('click', () => selectFloor(f.index));
+      floorListEl.appendChild(btn);
+    });
+
+    // 5. Load Generated .glb Model
+    const gltfLoader = new GLTFLoader();
+    const glbCandidates = ['./vibgyor.glb', '../outputs/vibgyor.glb'];
+
+    function loadModel(idx = 0) {
+      if (idx >= glbCandidates.length) {
+        document.getElementById('loading-text').textContent = 'Could not load vibgyor.glb';
+        return;
+      }
+      gltfLoader.load(
+        glbCandidates[idx],
+        (gltf) => {
+          const root = gltf.scene;
+          root.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+              // Clone material per mesh so floor highlighting doesn't tint other floors
+              child.material = child.material.clone();
+              child.userData.origEmissive = child.material.emissive ? child.material.emissive.clone() : new THREE.Color(0x000000);
+              child.userData.origEmissiveIntensity = child.material.emissiveIntensity || 0;
+
+              // Parse floor index from custom extras or mesh name (e.g. Floor_3_Walls)
+              let fIdx = child.userData?.floor_index;
+              if (fIdx === undefined && child.parent?.userData?.floor_index !== undefined) {
+                fIdx = child.parent.userData.floor_index;
+              }
+              if (fIdx === undefined) {
+                const m = child.name.match(/Floor_(\d+)/);
+                if (m) fIdx = parseInt(m[1], 10);
+              }
+              if (fIdx !== undefined && floorMeshes.has(fIdx)) {
+                child.userData.floorIndex = fIdx;
+                if (child.name.includes('TypeA')) child.userData.unitType = 'A';
+                if (child.name.includes('TypeB')) child.userData.unitType = 'B';
+                floorMeshes.get(fIdx).push(child);
+                allBuildingMeshes.push(child);
+              }
+            }
+          });
+          scene.add(root);
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => (loadingOverlay.style.display = 'none'), 350);
+        },
+        undefined,
+        () => loadModel(idx + 1)
+      );
+    }
+    loadModel(0);
+
+    // 6. Interactive Floor Selection & Highlighting
+    function selectFloor(floorIdx) {
+      selectedFloor = floorIdx;
+      document.querySelectorAll('.floor-btn').forEach((b) => {
+        b.classList.toggle('active', parseInt(b.dataset.floor, 10) === floorIdx);
+      });
+
+      // Reset all building meshes first
+      allBuildingMeshes.forEach((mesh) => {
+        if (mesh.material && mesh.material.emissive) {
+          mesh.material.emissive.copy(mesh.userData.origEmissive);
+          mesh.material.emissiveIntensity = mesh.userData.origEmissiveIntensity;
+        }
+      });
+
+      const titleEl = document.getElementById('info-floor-title');
+      const subEl = document.getElementById('info-floor-sub');
+      const flatsContainer = document.getElementById('info-flats-container');
+
+      if (floorIdx === null) {
+        titleEl.textContent = 'All Floors Overview';
+        subEl.style.display = 'block';
+        subEl.textContent = 'Click any floor directly on the 3D building (or select a floor button above) to highlight it and inspect its Type A and Type B 4BHK apartments.';
+        flatsContainer.style.display = 'none';
+        return;
+      }
+
+      // Highlight selected floor meshes (Type A warm orange tint, Type B sage green tint, structure warm gold)
+      const meshes = floorMeshes.get(floorIdx) || [];
+      meshes.forEach((mesh) => {
+        if (!mesh.material || !mesh.material.emissive) return;
+        if (mesh.userData.unitType === 'A' || (mesh.geometry && mesh.position.z > -19.5)) {
+          mesh.material.emissive.setHex(0xd97736);
+          mesh.material.emissiveIntensity = 0.55;
+        } else if (mesh.userData.unitType === 'B') {
+          mesh.material.emissive.setHex(0x689f75);
+          mesh.material.emissiveIntensity = 0.55;
+        } else {
+          mesh.material.emissive.setHex(0xe59849);
+          mesh.material.emissiveIntensity = 0.38;
+        }
+      });
+
+      const meta = FLOORS_META.find((m) => m.index === floorIdx);
+      if (meta && meta.isRes) {
+        const elev = (3.30 + (floorIdx - 1) * 3.05).toFixed(2);
+        titleEl.textContent = `${meta.label} (+${elev} m)`;
+        subEl.style.display = 'none';
+        flatsContainer.style.display = 'flex';
+        document.getElementById('flat-a-title').textContent = `Flat ${floorIdx}01 · Type A (Front)`;
+        document.getElementById('flat-b-title').textContent = `Flat ${floorIdx}02 · Type B (Rear)`;
+      } else if (meta) {
+        titleEl.textContent = meta.label;
+        subEl.style.display = 'block';
+        subEl.textContent = meta.desc;
+        flatsContainer.style.display = 'none';
+      }
+    }
+
+    document.getElementById('btn-clear-sel').addEventListener('click', (e) => {
+      e.preventDefault();
+      selectFloor(null);
+    });
+
+    // Raycast on click (ignore drags)
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let downPos = { x: 0, y: 0 };
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      downPos = { x: e.clientX, y: e.clientY };
+    });
+    renderer.domElement.addEventListener('pointerup', (e) => {
+      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 5) return;
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(allBuildingMeshes, false);
+      if (hits.length > 0 && hits[0].object.userData.floorIndex !== undefined) {
+        selectFloor(hits[0].object.userData.floorIndex);
+      } else {
+        selectFloor(null);
+      }
+    });
+
+    // 7. Camera Presets & Lighting Mode Switch
+    const CAM_PRESETS = {
+      eye:      { pos: [0.5, 2.0, 24.5],    target: [6.2, 11.2, -4.0] },
+      corner:   { pos: [-13.5, 2.5, 21.0],  target: [6.0, 11.0, -7.5] },
+      aerial:   { pos: [-23.0, 35.0, 27.0], target: [6.5, 9.5, -14.0] },
+      entrance: { pos: [3.0, 1.8, 12.5],    target: [4.8, 2.2, 0.5] },
+      interior: { pos: [6.8, 4.75, -11.5],  target: [8.8, 4.65, -15.2] }
+    };
+
+    document.querySelectorAll('[data-cam]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const preset = CAM_PRESETS[btn.dataset.cam];
+        if (!preset) return;
+        camera.position.set(...preset.pos);
+        controls.target.set(...preset.target);
+        controls.update();
+      });
+    });
+
+    const btnDay = document.getElementById('btn-mode-day');
+    const btnDusk = document.getElementById('btn-mode-dusk');
+    btnDay.addEventListener('click', () => {
+      btnDay.classList.add('active');
+      btnDusk.classList.remove('active');
+      sunLight.intensity = 3.2;
+      hemiLight.intensity = 0.85;
+      scene.backgroundIntensity = 0.85;
+      scene.environmentIntensity = 0.90;
+      duskLightsGroup.visible = false;
+    });
+    btnDusk.addEventListener('click', () => {
+      btnDusk.classList.add('active');
+      btnDay.classList.remove('active');
+      sunLight.intensity = 0.35;
+      hemiLight.intensity = 0.25;
+      scene.backgroundIntensity = 0.18;
+      scene.environmentIntensity = 0.30;
+      duskLightsGroup.visible = true;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // 8. Animation Loop + FPS Counter
+    let frames = 0;
+    let lastTime = performance.now();
+    const fpsEl = document.getElementById('fps-counter');
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+
+      frames++;
+      const now = performance.now();
+      if (now - lastTime >= 500) {
+        const fps = Math.round((frames * 1000) / (now - lastTime));
+        fpsEl.textContent = `${fps} FPS`;
+        frames = 0;
+        lastTime = now;
+      }
+    }
+    animate();
+  </script>
+</body>
+</html>

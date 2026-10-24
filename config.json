@@ -1,0 +1,138 @@
+{
+  "_comment": "Configuration for Vibgyor DXF-to-3D Pipeline. Contains only non-2D-plan parameters allowed by Rule 02: vertical heights from Section A-A, DXF region bounding boxes & origins, CAD layer mappings, and PBR material/lighting choices.",
+  "dxf_candidates": [
+    "SUBMISSION - 04.dxf",
+    "vibgyor-task/SUBMISSION - 04.dxf"
+  ],
+  "heights": {
+    "basement_depth": 4.65,
+    "stilt_floor_to_floor": 3.30,
+    "typical_floor_to_floor": 3.05,
+    "top_floor_to_terrace": 3.10,
+    "num_residential_floors": 7,
+    "slab_thickness": 0.15,
+    "parapet_railing_height": 1.15,
+    "stair_cabin_height": 3.00,
+    "ohwt_height": 2.40,
+    "window_sill_height": 0.90,
+    "window_lintel_height": 2.12,
+    "ventilator_sill_height": 1.50,
+    "ventilator_lintel_height": 2.12,
+    "door_lintel_height": 2.10,
+    "planter_box_height": 0.48,
+    "compound_wall_height": 2.10,
+    "canopy_height": 3.15
+  },
+  "dxf_regions": {
+    "layout_plan": {
+      "bbox": [58.0, 92.0, 29.0, 95.0],
+      "building_origin": [67.958, 47.623]
+    },
+    "gf_parking_plan": {
+      "bbox": [192.0, 222.0, 30.0, 92.0],
+      "building_origin": [200.958, 48.183]
+    },
+    "basement_plan": {
+      "bbox": [226.0, 256.0, 30.0, 92.0],
+      "building_origin": [235.125, 48.183]
+    },
+    "ground_floor_plan": {
+      "bbox": [311.0, 327.0, 29.0, 71.0],
+      "building_origin": [313.319, 30.988]
+    },
+    "typical_floor_plan": {
+      "bbox": [328.0, 343.5, 29.0, 71.0],
+      "building_origin": [329.162, 31.194]
+    },
+    "rera_carpet_plan": {
+      "bbox": [343.5, 351.5, 29.0, 71.0],
+      "block_name": "A$C27EF3DA3",
+      "y_offset_in_block": -1.018
+    },
+    "terrace_plan": {
+      "bbox": [350.5, 366.0, 29.0, 71.0],
+      "building_origin": [350.948, 31.194]
+    },
+    "front_elevation": {
+      "bbox": [311.0, 327.5, 72.0, 110.0],
+      "origin_x": 313.423,
+      "ground_y": 78.797
+    },
+    "section_aa": {
+      "bbox": [327.5, 355.0, 72.0, 110.0],
+      "ground_y": 78.530
+    }
+  },
+  "layers": {
+    "walls": ["g-wall", "A_Wall"],
+    "columns": ["COLUMN_BSE", "g-r.c.c"],
+    "slabs": ["A_BUILT UP"],
+    "projections": ["A_PROJ."],
+    "windows": ["A_WINDOW"],
+    "glazed_sliding": ["g-dw"],
+    "doors": ["A_DOOR"],
+    "railings": ["g-ele01"],
+    "parapets": ["A_PARAPET"],
+    "stairs": ["g-ele02", "g-ele-03", "g-ele-01", "A_STAIR"],
+    "ducts": ["A_DUCT"],
+    "plot_boundary": ["F.P.LINE"],
+    "roads": ["A_ROAD"],
+    "ramps": ["A_RAMP"],
+    "trees": ["A_TREE"],
+    "room_labels": ["A_TEXT"],
+    "dw_labels": ["A_Text D&W"],
+    "rera_carpet": ["A_RERA CARPET", "A_RERA AREA"]
+  },
+  "materials": {
+    "concrete_facade": {
+      "base_color": [0.74, 0.75, 0.76],
+      "roughness": 0.65,
+      "bump_strength": 0.15
+    },
+    "dark_concrete": {
+      "base_color": [0.22, 0.23, 0.25],
+      "roughness": 0.72
+    },
+    "stucco_inner": {
+      "base_color": [0.86, 0.85, 0.82],
+      "roughness": 0.78
+    },
+    "charcoal_metal_fins": {
+      "base_color": [0.14, 0.15, 0.16],
+      "metallic": 0.82,
+      "roughness": 0.32
+    },
+    "planter_terracotta_wood": {
+      "base_color": [0.68, 0.42, 0.24],
+      "roughness": 0.55
+    },
+    "wood_slats": {
+      "base_color": [0.55, 0.34, 0.18],
+      "roughness": 0.48
+    },
+    "window_glass": {
+      "base_color": [0.78, 0.88, 0.94],
+      "transmission": 0.85,
+      "roughness": 0.04,
+      "ior": 1.52
+    },
+    "railing_glass": {
+      "base_color": [0.82, 0.90, 0.92],
+      "transmission": 0.88,
+      "roughness": 0.05,
+      "ior": 1.52
+    },
+    "asphalt_road": {
+      "base_color": [0.18, 0.18, 0.19],
+      "roughness": 0.85
+    },
+    "paver_driveway": {
+      "base_color": [0.58, 0.56, 0.53],
+      "roughness": 0.75
+    },
+    "foliage_green": {
+      "base_color": [0.18, 0.38, 0.12],
+      "roughness": 0.65
+    }
+  }
+}
