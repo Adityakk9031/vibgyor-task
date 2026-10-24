@@ -4,12 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vibgyor — Interactive 3D Architectural Viewer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121618'/%3E%3Cpath d='M16 14 L32 50 L48 14' stroke='%23d97736' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
   <style>
     :root {
-      --bg-panel: rgba(18, 22, 24, 0.88);
-      --border-panel: rgba(255, 255, 255, 0.12);
+      --bg-panel: rgba(18, 22, 24, 0.90);
+      --border-panel: rgba(255, 255, 255, 0.14);
       --accent-orange: #d97736;
-      --accent-sage: #7c9a82;
+      --accent-sage: #689f75;
+      --accent-blue: #38bdf8;
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
     }
@@ -26,7 +28,7 @@
       position: absolute; top: 20px; left: 20px; z-index: 10;
       background: var(--bg-panel); backdrop-filter: blur(12px);
       border: 1px solid var(--border-panel); border-radius: 12px;
-      padding: 16px 22px; max-width: 380px;
+      padding: 16px 22px; max-width: 390px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     }
     .header-tag {
@@ -34,16 +36,31 @@
       text-transform: uppercase; color: var(--accent-orange); margin-bottom: 4px;
     }
     .header-title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
-    .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+    .header-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
+
+    /* Floating Selection Banner (Top Center) */
+    .selection-banner {
+      position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10;
+      background: var(--bg-panel); backdrop-filter: blur(12px);
+      border: 1px solid var(--accent-orange); border-radius: 999px;
+      padding: 10px 22px; font-size: 13px; font-weight: 600;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+      display: none; align-items: center; gap: 12px; white-space: nowrap;
+    }
+    .selection-banner.visible { display: flex; }
+    .banner-dot {
+      width: 10px; height: 10px; border-radius: 50%; background: var(--accent-orange);
+      box-shadow: 0 0 10px var(--accent-orange);
+    }
 
     /* Right Control & Floor Inspector Panel */
     .side-panel {
       position: absolute; top: 20px; right: 20px; z-index: 10;
-      width: 340px; max-height: calc(100vh - 40px); overflow-y: auto;
+      width: 365px; max-height: calc(100vh - 40px); overflow-y: auto;
       background: var(--bg-panel); backdrop-filter: blur(12px);
       border: 1px solid var(--border-panel); border-radius: 12px;
       padding: 18px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-      display: flex; flex-direction: column; gap: 16px;
+      display: flex; flex-direction: column; gap: 15px;
     }
     .section-label {
       font-size: 11px; font-weight: 700; text-transform: uppercase;
@@ -58,46 +75,89 @@
       font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
       text-align: center;
     }
-    .btn:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255,255,255,0.28); }
+    .btn:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255,255,255,0.3); }
     .btn.active {
       background: var(--accent-orange); border-color: var(--accent-orange); color: #fff;
+    }
+    .btn-cutaway {
+      width: 100%; margin-top: 6px;
+      background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4);
+      color: #bae6fd;
+    }
+    .btn-cutaway.active {
+      background: #0284c7; border-color: #38bdf8; color: #fff;
     }
 
     /* Floor Selector Stack */
     .floor-stack { display: flex; flex-direction: column; gap: 5px; }
-    .floor-btn {
+    .floor-row {
       display: flex; justify-content: space-between; align-items: center;
       background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-panel);
-      color: var(--text-main); padding: 8px 12px; border-radius: 7px;
+      color: var(--text-main); padding: 6px 10px; border-radius: 8px;
       font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
     }
-    .floor-btn:hover { background: rgba(255, 255, 255, 0.12); }
-    .floor-btn.active {
-      background: rgba(217, 119, 54, 0.24); border-color: var(--accent-orange);
+    .floor-row:hover { background: rgba(255, 255, 255, 0.11); }
+    .floor-row.active {
+      background: rgba(217, 119, 54, 0.22); border-color: var(--accent-orange);
     }
-    .floor-badges { display: flex; gap: 5px; }
+    .floor-label-btn {
+      flex: 1; text-align: left; padding: 3px 4px; cursor: pointer;
+    }
+    .floor-badges { display: flex; gap: 6px; }
     .badge {
-      font-size: 10.5px; padding: 2px 6px; border-radius: 4px; font-weight: 700;
+      font-size: 10.5px; padding: 4px 8px; border-radius: 5px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s ease; user-select: none;
     }
-    .badge-a { background: rgba(217, 119, 54, 0.28); color: #ffad75; border: 1px solid rgba(217, 119, 54, 0.5); }
-    .badge-b { background: rgba(124, 154, 130, 0.28); color: #b5d6bc; border: 1px solid rgba(124, 154, 130, 0.5); }
+    .badge-a {
+      background: rgba(217, 119, 54, 0.22); color: #ffad75;
+      border: 1px solid rgba(217, 119, 54, 0.45);
+    }
+    .badge-a:hover, .badge-a.selected {
+      background: var(--accent-orange); color: #fff; border-color: #fff;
+      box-shadow: 0 0 10px rgba(217, 119, 54, 0.6);
+    }
+    .badge-b {
+      background: rgba(104, 159, 117, 0.22); color: #b5e0c0;
+      border: 1px solid rgba(104, 159, 117, 0.45);
+    }
+    .badge-b:hover, .badge-b.selected {
+      background: var(--accent-sage); color: #fff; border-color: #fff;
+      box-shadow: 0 0 10px rgba(104, 159, 117, 0.6);
+    }
 
-    /* Selected Floor Details Card */
+    /* Selected Floor & Flat Details Card */
     .info-card {
-      background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-panel);
+      background: rgba(0, 0, 0, 0.38); border: 1px solid var(--border-panel);
       border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
     }
-    .info-title { font-size: 16px; font-weight: 700; color: #fff; }
+    .info-title { font-size: 15.5px; font-weight: 700; color: #fff; }
     .flat-box {
-      padding: 10px; border-radius: 7px; font-size: 12px; line-height: 1.45;
+      padding: 11px; border-radius: 8px; font-size: 12px; line-height: 1.45;
+      cursor: pointer; transition: all 0.15s ease; border: 1px solid transparent;
     }
     .flat-box.type-a {
-      background: rgba(217, 119, 54, 0.15); border-left: 3px solid var(--accent-orange);
+      background: rgba(217, 119, 54, 0.14); border-left: 4px solid var(--accent-orange);
+    }
+    .flat-box.type-a:hover, .flat-box.type-a.selected {
+      background: rgba(217, 119, 54, 0.28); border-color: var(--accent-orange);
     }
     .flat-box.type-b {
-      background: rgba(124, 154, 130, 0.15); border-left: 3px solid var(--accent-sage);
+      background: rgba(104, 159, 117, 0.14); border-left: 4px solid var(--accent-sage);
     }
-    .flat-head { font-weight: 700; font-size: 13px; margin-bottom: 3px; color: #fff; }
+    .flat-box.type-b:hover, .flat-box.type-b.selected {
+      background: rgba(104, 159, 117, 0.28); border-color: var(--accent-sage);
+    }
+    .flat-head {
+      font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #fff;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .room-pills {
+      display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
+    }
+    .room-pill {
+      font-size: 10.5px; background: rgba(0,0,0,0.35); padding: 2px 6px;
+      border-radius: 4px; color: #e5e7eb;
+    }
 
     /* Bottom Left Status / FPS / Instructions */
     .footer-bar {
@@ -148,6 +208,11 @@
       </div>
     </div>
 
+    <div class="selection-banner" id="selection-banner">
+      <span class="banner-dot" id="banner-dot"></span>
+      <span id="banner-text">3rd Floor Selected</span>
+    </div>
+
     <div class="side-panel">
       <div>
         <div class="section-label">Time of Day & Lighting</div>
@@ -165,13 +230,14 @@
           <button class="btn" data-cam="aerial">3 · Aerial 45°</button>
           <button class="btn" data-cam="entrance">4 · Entrance</button>
         </div>
-        <button class="btn" data-cam="interior" style="width:100%; margin-top:8px;">Bonus · Floor 1 Type A Drawing Room</button>
+        <button class="btn" data-cam="interior" style="width:100%; margin-top:8px;">Bonus · Floor 1 Type A Drawing Room (3D)</button>
+        <button class="btn btn-cutaway" id="btn-cutaway">Slice / Cutaway Upper Floors: OFF</button>
       </div>
 
       <div>
-        <div class="section-label" style="display:flex; justify-content:space-between;">
-          <span>Click Floor on Model or Below</span>
-          <a href="#" id="btn-clear-sel" style="color:var(--accent-orange); text-decoration:none; font-size:11px;">Reset</a>
+        <div class="section-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Select Floor or Flat (Type A / Type B)</span>
+          <a href="#" id="btn-clear-sel" style="color:var(--accent-orange); text-decoration:none; font-size:11px; font-weight:700;">Show All</a>
         </div>
         <div class="floor-stack" id="floor-list"></div>
       </div>
@@ -179,16 +245,34 @@
       <div class="info-card" id="floor-info-card">
         <div class="info-title" id="info-floor-title">All Floors Overview</div>
         <div style="font-size:12px; color:var(--text-muted);" id="info-floor-sub">
-          Click any floor directly on the 3D building (or select a floor button above) to highlight it and inspect its Type A and Type B 4BHK apartments.
+          Click any floor or flat directly on the 3D building—or click a floor / <strong>Type A</strong> / <strong>Type B</strong> button above—to fly to it, highlight it in 3D, or slice the floor plan.
         </div>
         <div id="info-flats-container" style="display:none; flex-direction:column; gap:8px;">
-          <div class="flat-box type-a">
-            <div class="flat-head" id="flat-a-title">Flat 101 · Type A (Front)</div>
-            <div>4 BHK + Servant Room · Facing 18.0 m Wide Road<br/>RERA Carpet Area: <strong>160.05 sq.m</strong> · Drawing: 6.53 × 3.65 m</div>
+          <div class="flat-box type-a" id="card-type-a">
+            <div class="flat-head">
+              <span id="flat-a-title">Flat 101 · Type A (Front Wing)</span>
+              <span style="font-size:11px; color:#ffad75;">Focus ↗</span>
+            </div>
+            <div>4 BHK + Servant · Facing 18.0 m Wide Road<br/>RERA Carpet Area: <strong>160.05 sq.m</strong></div>
+            <div class="room-pills">
+              <span class="room-pill">Drawing 6.53×3.65m</span>
+              <span class="room-pill">Dining 4.08×3.43m</span>
+              <span class="room-pill">Kitchen 3.28×3.65m</span>
+              <span class="room-pill">4 Beds + 4 Baths</span>
+            </div>
           </div>
-          <div class="flat-box type-b">
-            <div class="flat-head" id="flat-b-title">Flat 102 · Type B (Rear)</div>
-            <div>4 BHK + Servant Room · North Wing<br/>RERA Carpet Area: <strong>143.18 sq.m</strong> · Drawing: 6.31 × 3.65 m</div>
+          <div class="flat-box type-b" id="card-type-b">
+            <div class="flat-head">
+              <span id="flat-b-title">Flat 102 · Type B (Rear / North Wing)</span>
+              <span style="font-size:11px; color:#b5e0c0;">Focus ↗</span>
+            </div>
+            <div>4 BHK + Servant · Quiet North Courtyard Wing<br/>RERA Carpet Area: <strong>143.18 sq.m</strong></div>
+            <div class="room-pills">
+              <span class="room-pill">Drawing 6.31×3.65m</span>
+              <span class="room-pill">Dining 3.54×3.50m</span>
+              <span class="room-pill">Kitchen 3.58×3.05m</span>
+              <span class="room-pill">4 Beds + 4 Baths</span>
+            </div>
           </div>
         </div>
       </div>
@@ -196,7 +280,7 @@
 
     <div class="footer-bar">
       <span><strong class="fps-badge" id="fps-counter">60 FPS</strong></span>
-      <span>Left-drag: Orbit · Right-drag: Pan · Scroll: Zoom · Click Building: Select Floor & Flats</span>
+      <span>Left-drag: Orbit · Right-drag: Pan · Scroll: Zoom · Click Building or Badges: Focus Floor / Type A / Type B</span>
     </div>
   </div>
 
@@ -209,7 +293,7 @@
     const container = document.getElementById('canvas-container');
     const loadingOverlay = document.getElementById('loading-overlay');
 
-    // 1. Renderer with ACESFilmic / AgX Tone Mapping & Soft Shadows
+    // 1. WebGLRenderer with AgX / ACES Tone Mapping & Soft Shadows
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -223,19 +307,34 @@
     scene.background = new THREE.Color(0x9ec2df);
 
     // Note: Blender glTF export uses Y-up where (X_b, Y_b, Z_b) -> (X_b, Z_b, -Y_b)
-    // Building footprint in Blender is X in [0, 13.1], Y in [0, 38.7], Z in [0, 29]
-    // So in Three.js Y-up: X in [0, 13.1], Y (height) in [0, 29], Z in [-38.7, 0]
+    // Building footprint in Three.js Y-up:
+    //   X in [0, 13.12], Y (height) in [0, 30.1], Z in [-38.73, 0]
+    //   Type A (Front wing facing road): Z in [-19.6, +0.6]
+    //   Type B (Rear/North wing):        Z in [-39.3, -19.6]
     const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.2, 400);
-    camera.position.set(-14, 10, 22);
+    camera.position.set(-16, 14, 24);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.target.set(6.5, 11.5, -15.0);
+    controls.dampingFactor = 0.07;
+    controls.target.set(6.5, 11.5, -16.0);
     controls.maxPolarAngle = Math.PI * 0.495;
-    controls.minDistance = 3;
+    controls.minDistance = 2.5;
     controls.maxDistance = 140;
     controls.update();
+
+    // Smooth camera flight state
+    let camAnim = null;
+    function flyCameraTo(targetPos, targetLookAt, durationMs = 650) {
+      camAnim = {
+        startPos: camera.position.clone(),
+        endPos: new THREE.Vector3(...targetPos),
+        startTarget: controls.target.clone(),
+        endTarget: new THREE.Vector3(...targetLookAt),
+        startTime: performance.now(),
+        duration: durationMs
+      };
+    }
 
     // 2. Sun & Fill Lights with Shadows
     const sunLight = new THREE.DirectionalLight(0xfff5e4, 3.2);
@@ -272,7 +371,38 @@
     duskLightsGroup.add(canopyLight);
     scene.add(duskLightsGroup);
 
-    // 3. Load Poly Haven HDRI for realistic reflections & sky
+    // 3. 3D Highlight Volumes for Selected Floor, Type A (Front), and Type B (Rear)
+    const highlightGroup = new THREE.Group();
+    scene.add(highlightGroup);
+
+    function createHighlightBox(width, height, depth, colorHex, opacity = 0.24) {
+      const group = new THREE.Group();
+      const geom = new THREE.BoxGeometry(width, height, depth);
+      const mat = new THREE.MeshBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: opacity,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      const mesh = new THREE.Mesh(geom, mat);
+      const edges = new THREE.EdgesGeometry(geom);
+      const lineMat = new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2 });
+      const wireframe = new THREE.LineSegments(edges, lineMat);
+      group.add(mesh, wireframe);
+      group.visible = false;
+      highlightGroup.add(group);
+      return group;
+    }
+
+    // Type A (Front Wing: X in [-0.4, 13.6], Z in [-19.6, +0.8])
+    const boxTypeA = createHighlightBox(14.2, 3.05, 20.4, 0xff7b24, 0.22);
+    // Type B (Rear Wing: X in [-0.4, 13.6], Z in [-39.2, -19.6])
+    const boxTypeB = createHighlightBox(14.2, 3.05, 19.6, 0x4ade80, 0.22);
+    // Full Floor Box (Stilt / Terrace)
+    const boxFullFloor = createHighlightBox(14.4, 3.30, 39.8, 0x38bdf8, 0.18);
+
+    // 4. Load Poly Haven HDRI for realistic reflections & sky
     const rgbeLoader = new RGBELoader();
     rgbeLoader.load(
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloppenheim_06_puresky_1k.hdr',
@@ -287,49 +417,77 @@
       () => { /* fallback procedural sky background stays active if offline */ }
     );
 
-    // 4. Floor & Flat Metadata Registry
+    // 5. Floor & Flat Metadata Registry
     const FLOORS_META = [
-      { index: 8, label: 'Terrace & Cabin', badge: 'Roof', isRes: false, desc: 'Open Terrace, Parapet (1.15 m), Stair Cabin (+3.0 m) & Overhead Water Tank (+2.4 m).' },
-      { index: 7, label: '7th Floor', isRes: true },
-      { index: 6, label: '6th Floor', isRes: true },
-      { index: 5, label: '5th Floor', isRes: true },
-      { index: 4, label: '4th Floor', isRes: true },
-      { index: 3, label: '3rd Floor', isRes: true },
-      { index: 2, label: '2nd Floor', isRes: true },
-      { index: 1, label: '1st Floor', isRes: true },
-      { index: 0, label: 'Ground (Stilt)', badge: 'Parking', isRes: false, desc: 'Hollow Plinth Stilt Parking (3.30 m height), Entrance Foyer, 2 Lifts & Core Staircase.' }
+      { index: 8, label: 'Terrace & Cabin', badge: 'Roof', isRes: false, y0: 24.70, h: 5.40, desc: 'Open Terrace, Parapet (1.15 m), Stair Cabin (+3.0 m) & Overhead Water Tank (+2.4 m).' },
+      { index: 7, label: '7th Floor', isRes: true, y0: 21.60, h: 3.10 },
+      { index: 6, label: '6th Floor', isRes: true, y0: 18.55, h: 3.05 },
+      { index: 5, label: '5th Floor', isRes: true, y0: 15.50, h: 3.05 },
+      { index: 4, label: '4th Floor', isRes: true, y0: 12.45, h: 3.05 },
+      { index: 3, label: '3rd Floor', isRes: true, y0: 9.40,  h: 3.05 },
+      { index: 2, label: '2nd Floor', isRes: true, y0: 6.35,  h: 3.05 },
+      { index: 1, label: '1st Floor', isRes: true, y0: 3.30,  h: 3.05 },
+      { index: 0, label: 'Ground (Stilt)', badge: 'Parking', isRes: false, y0: 0.0, h: 3.30, desc: 'Hollow Plinth Stilt Parking (3.30 m height), Entrance Foyer, 2 Lifts & Core Staircase.' }
     ];
 
     const floorMeshes = new Map(); // floorIndex -> Array of Mesh
     const allBuildingMeshes = [];
     let selectedFloor = null;
+    let selectedUnit = null; // null | 'A' | 'B'
+    let cutawayEnabled = false;
 
-    // Build Floor Selector UI
+    // Build Floor Selector UI with separate clickable Floor label, Type A badge, and Type B badge
     const floorListEl = document.getElementById('floor-list');
     FLOORS_META.forEach((f) => {
       floorMeshes.set(f.index, []);
-      const btn = document.createElement('button');
-      btn.className = 'floor-btn';
-      btn.dataset.floor = f.index;
+      const row = document.createElement('div');
+      row.className = 'floor-row';
+      row.dataset.floor = f.index;
+
       if (f.isRes) {
-        btn.innerHTML = `
-          <span>${f.label}</span>
+        row.innerHTML = `
+          <span class="floor-label-btn">${f.label}</span>
           <span class="floor-badges">
-            <span class="badge badge-a">${f.index}01 · Type A</span>
-            <span class="badge badge-b">${f.index}02 · Type B</span>
+            <span class="badge badge-a" data-unit="A" title="Click to focus Flat ${f.index}01 (Type A Front)">${f.index}01 · Type A</span>
+            <span class="badge badge-b" data-unit="B" title="Click to focus Flat ${f.index}02 (Type B Rear)">${f.index}02 · Type B</span>
           </span>
         `;
+        row.querySelector('.floor-label-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectFloorAndUnit(f.index, null, true);
+        });
+        row.querySelector('[data-unit="A"]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectFloorAndUnit(f.index, 'A', true);
+        });
+        row.querySelector('[data-unit="B"]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectFloorAndUnit(f.index, 'B', true);
+        });
+        row.addEventListener('click', () => selectFloorAndUnit(f.index, null, true));
       } else {
-        btn.innerHTML = `
-          <span>${f.label}</span>
+        row.innerHTML = `
+          <span class="floor-label-btn">${f.label}</span>
           <span class="floor-badges"><span class="badge" style="background:rgba(255,255,255,0.12);">${f.badge}</span></span>
         `;
+        row.addEventListener('click', () => selectFloorAndUnit(f.index, null, true));
       }
-      btn.addEventListener('click', () => selectFloor(f.index));
-      floorListEl.appendChild(btn);
+      floorListEl.appendChild(row);
     });
 
-    // 5. Load Generated .glb Model
+    // Also make the two detail cards at the bottom clickable to focus Type A or Type B!
+    document.getElementById('card-type-a').addEventListener('click', () => {
+      if (selectedFloor !== null && selectedFloor >= 1 && selectedFloor <= 7) {
+        selectFloorAndUnit(selectedFloor, 'A', true);
+      }
+    });
+    document.getElementById('card-type-b').addEventListener('click', () => {
+      if (selectedFloor !== null && selectedFloor >= 1 && selectedFloor <= 7) {
+        selectFloorAndUnit(selectedFloor, 'B', true);
+      }
+    });
+
+    // 6. Load Generated .glb Model
     const gltfLoader = new GLTFLoader();
     const glbCandidates = ['./vibgyor.glb', '../outputs/vibgyor.glb'];
 
@@ -346,24 +504,26 @@
             if (child.isMesh) {
               child.castShadow = true;
               child.receiveShadow = true;
-              // Clone material per mesh so floor highlighting doesn't tint other floors
               child.material = child.material.clone();
               child.userData.origEmissive = child.material.emissive ? child.material.emissive.clone() : new THREE.Color(0x000000);
               child.userData.origEmissiveIntensity = child.material.emissiveIntensity || 0;
 
-              // Parse floor index from custom extras or mesh name (e.g. Floor_3_Walls)
-              let fIdx = child.userData?.floor_index;
-              if (fIdx === undefined && child.parent?.userData?.floor_index !== undefined) {
-                fIdx = child.parent.userData.floor_index;
-              }
+              // Parse floor index from custom extras or mesh/parent name
+              let fIdx = child.userData?.floor_index ?? child.parent?.userData?.floor_index;
+              const fullName = `${child.name || ''} ${child.parent?.name || ''}`;
               if (fIdx === undefined) {
-                const m = child.name.match(/Floor_(\d+)/);
+                const m = fullName.match(/Floor_(\d+)/);
                 if (m) fIdx = parseInt(m[1], 10);
               }
+              // Floor 1 interior furniture meshes start with TypeA_
+              if (fIdx === undefined && fullName.includes('TypeA_')) {
+                fIdx = 1;
+              }
+
               if (fIdx !== undefined && floorMeshes.has(fIdx)) {
                 child.userData.floorIndex = fIdx;
-                if (child.name.includes('TypeA')) child.userData.unitType = 'A';
-                if (child.name.includes('TypeB')) child.userData.unitType = 'B';
+                if (fullName.includes('TypeA')) child.userData.unitType = 'A';
+                if (fullName.includes('TypeB')) child.userData.unitType = 'B';
                 floorMeshes.get(fIdx).push(child);
                 allBuildingMeshes.push(child);
               }
@@ -379,14 +539,35 @@
     }
     loadModel(0);
 
-    // 6. Interactive Floor Selection & Highlighting
-    function selectFloor(floorIdx) {
+    // 7. Interactive Floor + Unit (Type A / Type B) Selection, Highlighting, Cutaway & Camera Focus
+    function updateCutawayVisibility() {
+      FLOORS_META.forEach((f) => {
+        const meshes = floorMeshes.get(f.index) || [];
+        const shouldHide = cutawayEnabled && selectedFloor !== null && f.index > selectedFloor;
+        meshes.forEach((m) => {
+          m.visible = !shouldHide;
+        });
+      });
+    }
+
+    function selectFloorAndUnit(floorIdx, unitType = null, animateCam = true) {
       selectedFloor = floorIdx;
-      document.querySelectorAll('.floor-btn').forEach((b) => {
-        b.classList.toggle('active', parseInt(b.dataset.floor, 10) === floorIdx);
+      selectedUnit = unitType;
+
+      // Update UI active states
+      document.querySelectorAll('.floor-row').forEach((row) => {
+        const rFloor = parseInt(row.dataset.floor, 10);
+        row.classList.toggle('active', rFloor === floorIdx);
+        const bA = row.querySelector('[data-unit="A"]');
+        const bB = row.querySelector('[data-unit="B"]');
+        if (bA) bA.classList.toggle('selected', rFloor === floorIdx && unitType === 'A');
+        if (bB) bB.classList.toggle('selected', rFloor === floorIdx && unitType === 'B');
       });
 
-      // Reset all building meshes first
+      document.getElementById('card-type-a').classList.toggle('selected', unitType === 'A');
+      document.getElementById('card-type-b').classList.toggle('selected', unitType === 'B');
+
+      // Reset all building mesh emissive tints
       allBuildingMeshes.forEach((mesh) => {
         if (mesh.material && mesh.material.emissive) {
           mesh.material.emissive.copy(mesh.userData.origEmissive);
@@ -394,56 +575,171 @@
         }
       });
 
+      boxTypeA.visible = false;
+      boxTypeB.visible = false;
+      boxFullFloor.visible = false;
+
+      const bannerEl = document.getElementById('selection-banner');
+      const bannerTextEl = document.getElementById('banner-text');
+      const bannerDotEl = document.getElementById('banner-dot');
       const titleEl = document.getElementById('info-floor-title');
       const subEl = document.getElementById('info-floor-sub');
       const flatsContainer = document.getElementById('info-flats-container');
 
+      updateCutawayVisibility();
+
       if (floorIdx === null) {
+        bannerEl.classList.remove('visible');
         titleEl.textContent = 'All Floors Overview';
         subEl.style.display = 'block';
-        subEl.textContent = 'Click any floor directly on the 3D building (or select a floor button above) to highlight it and inspect its Type A and Type B 4BHK apartments.';
+        subEl.innerHTML = 'Click any floor or flat directly on the 3D building—or click a floor / <strong>Type A</strong> / <strong>Type B</strong> button above—to fly to it, highlight it in 3D, or slice the floor plan.';
         flatsContainer.style.display = 'none';
         return;
       }
 
-      // Highlight selected floor meshes (Type A warm orange tint, Type B sage green tint, structure warm gold)
-      const meshes = floorMeshes.get(floorIdx) || [];
-      meshes.forEach((mesh) => {
-        if (!mesh.material || !mesh.material.emissive) return;
-        if (mesh.userData.unitType === 'A' || (mesh.geometry && mesh.position.z > -19.5)) {
-          mesh.material.emissive.setHex(0xd97736);
-          mesh.material.emissiveIntensity = 0.55;
-        } else if (mesh.userData.unitType === 'B') {
-          mesh.material.emissive.setHex(0x689f75);
-          mesh.material.emissiveIntensity = 0.55;
-        } else {
-          mesh.material.emissive.setHex(0xe59849);
-          mesh.material.emissiveIntensity = 0.38;
-        }
-      });
-
       const meta = FLOORS_META.find((m) => m.index === floorIdx);
-      if (meta && meta.isRes) {
-        const elev = (3.30 + (floorIdx - 1) * 3.05).toFixed(2);
-        titleEl.textContent = `${meta.label} (+${elev} m)`;
+      if (!meta) return;
+
+      const yCenter = meta.y0 + meta.h * 0.5;
+      const meshes = floorMeshes.get(floorIdx) || [];
+
+      if (meta.isRes) {
+        // Position 3D highlight volumes at this residential floor's exact height
+        boxTypeA.position.set(6.56, yCenter, -9.4);
+        boxTypeB.position.set(6.56, yCenter, -29.4);
+
+        if (unitType === 'A') {
+          boxTypeA.visible = true;
+          meshes.forEach((mesh) => {
+            if (!mesh.material?.emissive) return;
+            if (mesh.userData.unitType === 'A') {
+              mesh.material.emissive.setHex(0xff6b1a);
+              mesh.material.emissiveIntensity = 0.85;
+            } else if (mesh.userData.unitType !== 'B') {
+              mesh.material.emissive.setHex(0xd97736);
+              mesh.material.emissiveIntensity = 0.30;
+            }
+          });
+          bannerEl.classList.add('visible');
+          bannerDotEl.style.background = '#d97736';
+          bannerTextEl.textContent = `${meta.label} · Flat ${floorIdx}01 (Type A — Front 4BHK, 160.05 sq.m)`;
+          if (animateCam) {
+            if (cutawayEnabled) {
+              flyCameraTo([-10.0, meta.y0 + 18.0, 4.0], [6.5, meta.y0 + 1.0, -9.5]);
+            } else {
+              flyCameraTo([-11.0, yCenter + 2.5, 12.0], [6.5, yCenter, -8.5]);
+            }
+          }
+        } else if (unitType === 'B') {
+          boxTypeB.visible = true;
+          meshes.forEach((mesh) => {
+            if (!mesh.material?.emissive) return;
+            if (mesh.userData.unitType === 'B') {
+              mesh.material.emissive.setHex(0x4ade80);
+              mesh.material.emissiveIntensity = 0.85;
+            } else if (mesh.userData.unitType !== 'A') {
+              mesh.material.emissive.setHex(0x689f75);
+              mesh.material.emissiveIntensity = 0.30;
+            }
+          });
+          bannerEl.classList.add('visible');
+          bannerDotEl.style.background = '#4ade80';
+          bannerTextEl.textContent = `${meta.label} · Flat ${floorIdx}02 (Type B — Rear Wing 4BHK, 143.18 sq.m)`;
+          if (animateCam) {
+            if (cutawayEnabled) {
+              flyCameraTo([-12.0, meta.y0 + 18.0, -42.0], [6.5, meta.y0 + 1.0, -29.0]);
+            } else {
+              // Orbit to North-West corner so the Rear Wing (Type B) is front-and-center!
+              flyCameraTo([-16.0, yCenter + 3.0, -42.0], [6.5, yCenter, -28.5]);
+            }
+          }
+        } else {
+          // Whole residential floor selected: show both Type A (orange) and Type B (green) volumes!
+          boxTypeA.visible = true;
+          boxTypeB.visible = true;
+          meshes.forEach((mesh) => {
+            if (!mesh.material?.emissive) return;
+            if (mesh.userData.unitType === 'A') {
+              mesh.material.emissive.setHex(0xff7b24);
+              mesh.material.emissiveIntensity = 0.70;
+            } else if (mesh.userData.unitType === 'B') {
+              mesh.material.emissive.setHex(0x4ade80);
+              mesh.material.emissiveIntensity = 0.70;
+            } else {
+              mesh.material.emissive.setHex(0xe59849);
+              mesh.material.emissiveIntensity = 0.42;
+            }
+          });
+          bannerEl.classList.add('visible');
+          bannerDotEl.style.background = '#f59e0b';
+          bannerTextEl.textContent = `${meta.label} (+${meta.y0.toFixed(2)} m) · Flats ${floorIdx}01 (Type A) & ${floorIdx}02 (Type B)`;
+          if (animateCam) {
+            if (cutawayEnabled) {
+              flyCameraTo([-16.0, meta.y0 + 24.0, 2.0], [6.5, meta.y0 + 1.0, -19.0]);
+            } else {
+              flyCameraTo([-18.0, yCenter + 3.5, 14.0], [6.5, yCenter, -16.0]);
+            }
+          }
+        }
+
+        titleEl.textContent = `${meta.label} (+${meta.y0.toFixed(2)} m)`;
         subEl.style.display = 'none';
         flatsContainer.style.display = 'flex';
-        document.getElementById('flat-a-title').textContent = `Flat ${floorIdx}01 · Type A (Front)`;
-        document.getElementById('flat-b-title').textContent = `Flat ${floorIdx}02 · Type B (Rear)`;
-      } else if (meta) {
-        titleEl.textContent = meta.label;
+        document.getElementById('flat-a-title').textContent = `Flat ${floorIdx}01 · Type A (Front Wing)`;
+        document.getElementById('flat-b-title').textContent = `Flat ${floorIdx}02 · Type B (Rear Wing)`;
+      } else {
+        // Ground (Stilt) or Terrace
+        boxFullFloor.position.set(6.56, yCenter, -19.3);
+        boxFullFloor.visible = true;
+        meshes.forEach((mesh) => {
+          if (mesh.material?.emissive) {
+            mesh.material.emissive.setHex(0x38bdf8);
+            mesh.material.emissiveIntensity = 0.40;
+          }
+        });
+        bannerEl.classList.add('visible');
+        bannerDotEl.style.background = '#38bdf8';
+        bannerTextEl.textContent = `${meta.label} (+${meta.y0.toFixed(2)} m)`;
+        titleEl.textContent = `${meta.label} (+${meta.y0.toFixed(2)} m)`;
         subEl.style.display = 'block';
         subEl.textContent = meta.desc;
         flatsContainer.style.display = 'none';
+
+        if (animateCam) {
+          if (floorIdx === 0) {
+            flyCameraTo([-12.0, 4.5, 16.0], [6.5, 1.8, -10.0]);
+          } else {
+            flyCameraTo([-18.0, 34.0, 14.0], [6.5, 26.0, -18.0]);
+          }
+        }
       }
     }
 
     document.getElementById('btn-clear-sel').addEventListener('click', (e) => {
       e.preventDefault();
-      selectFloor(null);
+      cutawayEnabled = false;
+      const cutBtn = document.getElementById('btn-cutaway');
+      cutBtn.classList.remove('active');
+      cutBtn.textContent = 'Slice / Cutaway Upper Floors: OFF';
+      selectFloorAndUnit(null, null, false);
+      flyCameraTo([-16, 14, 24], [6.5, 11.5, -16.0]);
     });
 
-    // Raycast on click (ignore drags)
+    // Cutaway Upper Floors Toggle Button
+    const btnCutaway = document.getElementById('btn-cutaway');
+    btnCutaway.addEventListener('click', () => {
+      cutawayEnabled = !cutawayEnabled;
+      btnCutaway.classList.toggle('active', cutawayEnabled);
+      btnCutaway.textContent = `Slice / Cutaway Upper Floors: ${cutawayEnabled ? 'ON' : 'OFF'}`;
+      if (selectedFloor === null && cutawayEnabled) {
+        // Default to 3rd Floor if user turns on cutaway before picking a floor
+        selectFloorAndUnit(3, null, true);
+      } else {
+        selectFloorAndUnit(selectedFloor, selectedUnit, true);
+      }
+    });
+
+    // Raycast on click (detect both Floor AND whether the user clicked the Front/Type A half or Rear/Type B half!)
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let downPos = { x: 0, y: 0 };
@@ -456,15 +752,24 @@
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
       pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(allBuildingMeshes, false);
+      const visibleBuildingMeshes = allBuildingMeshes.filter((m) => m.visible);
+      const hits = raycaster.intersectObjects(visibleBuildingMeshes, false);
       if (hits.length > 0 && hits[0].object.userData.floorIndex !== undefined) {
-        selectFloor(hits[0].object.userData.floorIndex);
-      } else {
-        selectFloor(null);
+        const hitFloor = hits[0].object.userData.floorIndex;
+        const hitPt = hits[0].point;
+        // Determine if user clicked Type A (Front half: z > -19.6) or Type B (Rear half: z <= -19.6)
+        let hitUnit = hits[0].object.userData.unitType || null;
+        if (hitFloor >= 1 && hitFloor <= 7 && !hitUnit) {
+          // If the floor is already selected, clicking the front/rear wing focuses Type A / Type B
+          if (selectedFloor === hitFloor) {
+            hitUnit = hitPt.z > -19.6 ? 'A' : 'B';
+          }
+        }
+        selectFloorAndUnit(hitFloor, hitUnit, true);
       }
     });
 
-    // 7. Camera Presets & Lighting Mode Switch
+    // 8. Camera Presets & Lighting Mode Switch
     const CAM_PRESETS = {
       eye:      { pos: [0.5, 2.0, 24.5],    target: [6.2, 11.2, -4.0] },
       corner:   { pos: [-13.5, 2.5, 21.0],  target: [6.0, 11.0, -7.5] },
@@ -477,9 +782,13 @@
       btn.addEventListener('click', () => {
         const preset = CAM_PRESETS[btn.dataset.cam];
         if (!preset) return;
-        camera.position.set(...preset.pos);
-        controls.target.set(...preset.target);
-        controls.update();
+        if (btn.dataset.cam === 'interior') {
+          cutawayEnabled = false;
+          btnCutaway.classList.remove('active');
+          btnCutaway.textContent = 'Slice / Cutaway Upper Floors: OFF';
+          updateCutawayVisibility();
+        }
+        flyCameraTo(preset.pos, preset.target, 700);
       });
     });
 
@@ -510,18 +819,28 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // 8. Animation Loop + FPS Counter
+    // 9. Animation Loop + Smooth Camera Transitions + FPS Counter
     let frames = 0;
     let lastTime = performance.now();
     const fpsEl = document.getElementById('fps-counter');
 
     function animate() {
       requestAnimationFrame(animate);
+      const now = performance.now();
+
+      if (camAnim) {
+        const t = Math.min(1, (now - camAnim.startTime) / camAnim.duration);
+        // Smooth cubic ease-out
+        const ease = 1 - Math.pow(1 - t, 3);
+        camera.position.lerpVectors(camAnim.startPos, camAnim.endPos, ease);
+        controls.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, ease);
+        if (t >= 1) camAnim = null;
+      }
+
       controls.update();
       renderer.render(scene, camera);
 
       frames++;
-      const now = performance.now();
       if (now - lastTime >= 500) {
         const fps = Math.round((frames * 1000) / (now - lastTime));
         fpsEl.textContent = `${fps} FPS`;
