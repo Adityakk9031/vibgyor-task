@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vibgyor — Interactive 3D Architectural Viewer</title>
+  <title>Vibgyor — Interactive 3D Building, 360° Virtual Tour & Stills Viewer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121618'/%3E%3Cpath d='M16 14 L32 50 L48 14' stroke='%23d97736' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
   <style>
     :root {
-      --bg-panel: rgba(18, 22, 24, 0.90);
+      --bg-panel: rgba(18, 22, 24, 0.92);
       --border-panel: rgba(255, 255, 255, 0.14);
       --accent-orange: #d97736;
       --accent-sage: #689f75;
@@ -23,56 +23,74 @@
     }
     #canvas-container { width: 100%; height: 100%; position: relative; }
 
+    /* Top Mode Navigation Bar */
+    .mode-nav {
+      position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 30;
+      display: flex; gap: 6px; padding: 5px;
+      background: var(--bg-panel); backdrop-filter: blur(14px);
+      border: 1px solid var(--border-panel); border-radius: 999px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    }
+    .mode-tab {
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 8px 18px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+      cursor: pointer; transition: all 0.18s ease; white-space: nowrap;
+    }
+    .mode-tab:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+    .mode-tab.active {
+      background: var(--accent-orange); color: #fff;
+      box-shadow: 0 4px 14px rgba(217, 119, 54, 0.45);
+    }
+
     /* Top Header Bar */
     .header-bar {
-      position: absolute; top: 20px; left: 20px; z-index: 10;
+      position: absolute; top: 18px; left: 20px; z-index: 20;
       background: var(--bg-panel); backdrop-filter: blur(12px);
       border: 1px solid var(--border-panel); border-radius: 12px;
-      padding: 16px 22px; max-width: 390px;
+      padding: 14px 20px; max-width: 360px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     }
     .header-tag {
-      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--accent-orange); margin-bottom: 4px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent-orange); margin-bottom: 3px;
     }
-    .header-title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
-    .header-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
+    .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+    .header-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
 
-    /* Floating Selection Banner (Top Center) */
+    /* Floating Selection Banner */
     .selection-banner {
-      position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10;
+      position: absolute; top: 68px; left: 50%; transform: translateX(-50%); z-index: 20;
       background: var(--bg-panel); backdrop-filter: blur(12px);
       border: 1px solid var(--accent-orange); border-radius: 999px;
-      padding: 10px 22px; font-size: 13px; font-weight: 600;
+      padding: 8px 20px; font-size: 12.5px; font-weight: 600;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
-      display: none; align-items: center; gap: 12px; white-space: nowrap;
+      display: none; align-items: center; gap: 10px; white-space: nowrap;
     }
     .selection-banner.visible { display: flex; }
     .banner-dot {
-      width: 10px; height: 10px; border-radius: 50%; background: var(--accent-orange);
+      width: 9px; height: 9px; border-radius: 50%; background: var(--accent-orange);
       box-shadow: 0 0 10px var(--accent-orange);
     }
 
-    /* Right Control & Floor Inspector Panel */
+    /* Right Control Panel */
     .side-panel {
-      position: absolute; top: 20px; right: 20px; z-index: 10;
-      width: 365px; max-height: calc(100vh - 40px); overflow-y: auto;
+      position: absolute; top: 18px; right: 20px; z-index: 20;
+      width: 375px; max-height: calc(100vh - 36px); overflow-y: auto;
       background: var(--bg-panel); backdrop-filter: blur(12px);
       border: 1px solid var(--border-panel); border-radius: 12px;
-      padding: 18px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-      display: flex; flex-direction: column; gap: 15px;
+      padding: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      display: flex; flex-direction: column; gap: 14px;
     }
     .section-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px;
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 7px;
     }
 
-    /* Camera & Lighting Buttons */
-    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
     .btn {
       background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-panel);
-      color: var(--text-main); padding: 9px 12px; border-radius: 8px;
-      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+      color: var(--text-main); padding: 8px 11px; border-radius: 8px;
+      font-size: 11.5px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
       text-align: center;
     }
     .btn:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255,255,255,0.3); }
@@ -89,23 +107,21 @@
     }
 
     /* Floor Selector Stack */
-    .floor-stack { display: flex; flex-direction: column; gap: 5px; }
+    .floor-stack { display: flex; flex-direction: column; gap: 4px; }
     .floor-row {
       display: flex; justify-content: space-between; align-items: center;
       background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-panel);
-      color: var(--text-main); padding: 6px 10px; border-radius: 8px;
-      font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+      color: var(--text-main); padding: 5px 9px; border-radius: 7px;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
     }
     .floor-row:hover { background: rgba(255, 255, 255, 0.11); }
     .floor-row.active {
       background: rgba(217, 119, 54, 0.22); border-color: var(--accent-orange);
     }
-    .floor-label-btn {
-      flex: 1; text-align: left; padding: 3px 4px; cursor: pointer;
-    }
-    .floor-badges { display: flex; gap: 6px; }
+    .floor-label-btn { flex: 1; text-align: left; padding: 2px 4px; cursor: pointer; }
+    .floor-badges { display: flex; gap: 5px; }
     .badge {
-      font-size: 10.5px; padding: 4px 8px; border-radius: 5px; font-weight: 700;
+      font-size: 10px; padding: 3px 7px; border-radius: 5px; font-weight: 700;
       cursor: pointer; transition: all 0.15s ease; user-select: none;
     }
     .badge-a {
@@ -114,7 +130,6 @@
     }
     .badge-a:hover, .badge-a.selected {
       background: var(--accent-orange); color: #fff; border-color: #fff;
-      box-shadow: 0 0 10px rgba(217, 119, 54, 0.6);
     }
     .badge-b {
       background: rgba(104, 159, 117, 0.22); color: #b5e0c0;
@@ -122,17 +137,16 @@
     }
     .badge-b:hover, .badge-b.selected {
       background: var(--accent-sage); color: #fff; border-color: #fff;
-      box-shadow: 0 0 10px rgba(104, 159, 117, 0.6);
     }
 
-    /* Selected Floor & Flat Details Card */
+    /* Info Card */
     .info-card {
       background: rgba(0, 0, 0, 0.38); border: 1px solid var(--border-panel);
-      border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+      border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
     }
-    .info-title { font-size: 15.5px; font-weight: 700; color: #fff; }
+    .info-title { font-size: 14.5px; font-weight: 700; color: #fff; }
     .flat-box {
-      padding: 11px; border-radius: 8px; font-size: 12px; line-height: 1.45;
+      padding: 10px; border-radius: 8px; font-size: 11.5px; line-height: 1.4;
       cursor: pointer; transition: all 0.15s ease; border: 1px solid transparent;
     }
     .flat-box.type-a {
@@ -148,24 +162,134 @@
       background: rgba(104, 159, 117, 0.28); border-color: var(--accent-sage);
     }
     .flat-head {
-      font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #fff;
+      font-weight: 700; font-size: 12.5px; margin-bottom: 3px; color: #fff;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .room-pills {
-      display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
-    }
+    .room-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
     .room-pill {
-      font-size: 10.5px; background: rgba(0,0,0,0.35); padding: 2px 6px;
+      font-size: 10px; background: rgba(0,0,0,0.35); padding: 2px 6px;
       border-radius: 4px; color: #e5e7eb;
     }
 
+    /* 360° Virtual Tour Panel & Interactive Map */
+    .pano-list { display: flex; flex-direction: column; gap: 5px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
+    .pano-cat-head {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--accent-orange); margin-top: 6px; margin-bottom: 2px;
+    }
+    .pano-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 10px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border-panel);
+      color: var(--text-main); cursor: pointer; transition: all 0.15s ease;
+    }
+    .pano-item:hover { background: rgba(255,255,255,0.12); }
+    .pano-item.active {
+      background: rgba(217, 119, 54, 0.25); border-color: var(--accent-orange); color: #fff;
+    }
+    .pano-badge {
+      font-size: 9.5px; padding: 2px 6px; border-radius: 4px;
+      background: rgba(0,0,0,0.4); color: #cbd5e1;
+    }
+
+    /* Interactive 2D Floor/Site Map inside 360° panel */
+    .map-box {
+      background: rgba(10, 14, 17, 0.75); border: 1px solid var(--border-panel);
+      border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .map-filter-tabs { display: flex; gap: 4px; }
+    .map-filter-btn {
+      flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border-panel);
+      color: var(--text-muted); font-size: 10.5px; font-weight: 700; padding: 5px 4px;
+      border-radius: 6px; cursor: pointer; text-align: center;
+    }
+    .map-filter-btn.active {
+      background: rgba(56, 189, 248, 0.2); border-color: var(--accent-blue); color: #fff;
+    }
+    #pano-minimap {
+      width: 100%; height: 225px; background: #0d1216; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08); cursor: pointer; display: block;
+    }
+
+    /* 3D Hotspots Floating Overlay in 360° View */
+    #hotspot-layer {
+      position: absolute; inset: 0; pointer-events: none; z-index: 15; overflow: hidden;
+    }
+    .hotspot-pin {
+      position: absolute; transform: translate(-50%, -50%);
+      pointer-events: auto; cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(15, 19, 23, 0.88); backdrop-filter: blur(8px);
+      border: 1.5px solid var(--accent-orange); border-radius: 999px;
+      padding: 6px 13px 6px 9px; color: #fff; font-size: 12px; font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      white-space: nowrap;
+    }
+    .hotspot-pin:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+      background: var(--accent-orange); border-color: #fff;
+    }
+    .hotspot-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--accent-orange); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900;
+    }
+    .hotspot-pin:hover .hotspot-icon { background: #fff; color: var(--accent-orange); }
+
+    /* Stills Gallery Overlay View */
+    #gallery-overlay {
+      position: absolute; inset: 0; z-index: 25;
+      background: rgba(13, 17, 20, 0.96); backdrop-filter: blur(16px);
+      display: none; flex-direction: column; padding: 82px 28px 28px 28px;
+      overflow-y: auto;
+    }
+    #gallery-overlay.visible { display: flex; }
+    .gallery-container { max-width: 1360px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .gallery-section-title {
+      font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.01em;
+      border-left: 4px solid var(--accent-orange); padding-left: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px;
+    }
+    .gallery-card {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-panel);
+      border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.18s ease;
+    }
+    .gallery-card:hover {
+      transform: translateY(-3px); border-color: var(--accent-orange);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+    }
+    .gallery-card img {
+      width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #0b0e11;
+    }
+    .gallery-card-body { padding: 10px 13px; }
+    .gallery-card-title { font-size: 13px; font-weight: 700; color: #fff; }
+    .gallery-card-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Lightbox Modal for Full-Res 2560x1440 Inspection */
+    #lightbox-modal {
+      position: absolute; inset: 0; z-index: 60;
+      background: rgba(0, 0, 0, 0.92); display: none;
+      align-items: center; justify-content: center; flex-direction: column; gap: 12px; padding: 24px;
+    }
+    #lightbox-modal.visible { display: flex; }
+    #lightbox-img {
+      max-width: 94vw; max-height: 82vh; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    #lightbox-caption { font-size: 15px; font-weight: 700; color: #fff; }
+
     /* Bottom Left Status / FPS / Instructions */
     .footer-bar {
-      position: absolute; bottom: 20px; left: 20px; z-index: 10;
+      position: absolute; bottom: 18px; left: 20px; z-index: 20;
       background: var(--bg-panel); backdrop-filter: blur(10px);
       border: 1px solid var(--border-panel); border-radius: 10px;
-      padding: 10px 16px; font-size: 12px; color: var(--text-muted);
-      display: flex; align-items: center; gap: 16px;
+      padding: 9px 15px; font-size: 12px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 14px;
     }
     .fps-badge { color: #6ee7b7; font-weight: 700; font-variant-numeric: tabular-nums; }
 
@@ -196,24 +320,37 @@
   <div id="canvas-container">
     <div id="loading-overlay">
       <div class="spinner"></div>
-      <div id="loading-text" style="font-size:14px; font-weight:600;">Loading Vibgyor 3D Model (.glb) & HDRI Sky...</div>
+      <div id="loading-text" style="font-size:14px; font-weight:600;">Loading Vibgyor 3D Model (.glb) & 360° Virtual Tour...</div>
     </div>
 
+    <!-- Top Mode Switcher -->
+    <div class="mode-nav">
+      <button class="mode-tab active" id="tab-3d">🏢 3D Building Model (.glb)</button>
+      <button class="mode-tab" id="tab-360">🌐 360° Virtual Tour (16 Views)</button>
+      <button class="mode-tab" id="tab-gallery">🖼️ Stills Gallery (17 Renders)</button>
+    </div>
+
+    <!-- Top Left Header -->
     <div class="header-bar">
       <div class="header-tag">Prahlad Nagar · Ahmedabad</div>
       <div class="header-title">VIBGYOR</div>
-      <div class="header-sub">
-        Generated directly from <code>SUBMISSION - 04.dxf</code><br/>
-        Stilt Parking · 7 Residential Floors (2 × 4BHK/floor) · Terrace
+      <div class="header-sub" id="header-sub-text">
+        Generated 100% by code from <code>SUBMISSION - 04.dxf</code><br/>
+        Basement + Stilt · 7 Floors (Type A & B 4BHK) · Terrace Gym & Lounge
       </div>
     </div>
 
+    <!-- Top Center Selection / Active Pano Pill -->
     <div class="selection-banner" id="selection-banner">
       <span class="banner-dot" id="banner-dot"></span>
       <span id="banner-text">3rd Floor Selected</span>
     </div>
 
-    <div class="side-panel">
+    <!-- 3D Hotspot Pins Layer (Active in 360° Virtual Tour Mode) -->
+    <div id="hotspot-layer"></div>
+
+    <!-- Right Control Sidebar: Mode 1 (3D Building Inspector) -->
+    <div class="side-panel" id="panel-3d">
       <div>
         <div class="section-label">Time of Day & Lighting</div>
         <div class="btn-grid">
@@ -230,7 +367,8 @@
           <button class="btn" data-cam="aerial">3 · Aerial 45°</button>
           <button class="btn" data-cam="entrance">4 · Entrance</button>
         </div>
-        <button class="btn" data-cam="interior" style="width:100%; margin-top:8px;">Bonus · Floor 1 Type A Drawing Room (3D)</button>
+        <button class="btn" data-cam="terrace" style="width:100%; margin-top:6px;">5 · Terrace Pergola, Kids' Play & Gym</button>
+        <button class="btn" data-cam="interior" style="width:100%; margin-top:6px;">6 · Floor 1 Type A Drawing Room (3D)</button>
         <button class="btn btn-cutaway" id="btn-cutaway">Slice / Cutaway Upper Floors: OFF</button>
       </div>
 
@@ -256,31 +394,72 @@
             <div>4 BHK + Servant · Facing 18.0 m Wide Road<br/>RERA Carpet Area: <strong>160.05 sq.m</strong></div>
             <div class="room-pills">
               <span class="room-pill">Drawing 6.53×3.65m</span>
-              <span class="room-pill">Dining 4.08×3.43m</span>
-              <span class="room-pill">Kitchen 3.28×3.65m</span>
-              <span class="room-pill">4 Beds + 4 Baths</span>
+              <span class="room-pill">Kitchen/Dining 6.59×3.20m</span>
+              <span class="room-pill">Master Bed 3.96×5.02m</span>
+              <span class="room-pill">4 Beds + East Balcony</span>
             </div>
           </div>
           <div class="flat-box type-b" id="card-type-b">
             <div class="flat-head">
-              <span id="flat-b-title">Flat 102 · Type B (Rear / North Wing)</span>
+              <span id="flat-b-title">Flat 102 · Type B (Rear Wing)</span>
               <span style="font-size:11px; color:#b5e0c0;">Focus ↗</span>
             </div>
             <div>4 BHK + Servant · Quiet North Courtyard Wing<br/>RERA Carpet Area: <strong>143.18 sq.m</strong></div>
             <div class="room-pills">
               <span class="room-pill">Drawing 6.31×3.65m</span>
-              <span class="room-pill">Dining 3.54×3.50m</span>
-              <span class="room-pill">Kitchen 3.58×3.05m</span>
-              <span class="room-pill">4 Beds + 4 Baths</span>
+              <span class="room-pill">Kitchen/Dining 6.11×3.20m</span>
+              <span class="room-pill">Master Bed 5.34×3.65m</span>
+              <span class="room-pill">4 Beds + West Balcony</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Right Control Sidebar: Mode 2 (360° Virtual Tour Navigator & Interactive Map) -->
+    <div class="side-panel" id="panel-360" style="display:none;">
+      <div class="map-box">
+        <div class="section-label" style="margin-bottom:2px; display:flex; justify-content:space-between;">
+          <span>Interactive Floor / Site Map</span>
+          <span style="color:var(--accent-blue); font-size:10px;">Click any pin to jump</span>
+        </div>
+        <div class="map-filter-tabs">
+          <button class="map-filter-btn active" data-mapgroup="all">All (16)</button>
+          <button class="map-filter-btn" data-mapgroup="bldg">Amenities (6)</button>
+          <button class="map-filter-btn" data-mapgroup="typeA">Type A (5)</button>
+          <button class="map-filter-btn" data-mapgroup="typeB">Type B (5)</button>
+        </div>
+        <canvas id="pano-minimap" width="320" height="225"></canvas>
+      </div>
+
+      <div>
+        <div class="section-label">16 Equirectangular 360° Viewpoints (6144×3072)</div>
+        <div class="pano-list" id="pano-list-el"></div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-title" id="pano-info-title">1 · Entrance Gate & Canopy Drive</div>
+        <div style="font-size:11.5px; color:var(--text-muted); line-height:1.45;" id="pano-info-desc">
+          Drag anywhere on the 360° sphere to look around, scroll to zoom, or click the glowing <strong>3D Hotspot Portals</strong> in the scene to walk from room to room.
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 3: Full-Screen Stills Gallery (5 Amenity + 8 Interior + 4 Exterior @ 2560x1440) -->
+    <div id="gallery-overlay">
+      <div class="gallery-container" id="gallery-content"></div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox-modal">
+      <img id="lightbox-img" src="" alt="Full resolution render" />
+      <div id="lightbox-caption"></div>
+      <button class="btn active" id="btn-close-lightbox" style="padding:8px 24px;">Close Preview (Esc)</button>
+    </div>
+
     <div class="footer-bar">
       <span><strong class="fps-badge" id="fps-counter">60 FPS</strong></span>
-      <span>Left-drag: Orbit · Right-drag: Pan · Scroll: Zoom · Click Building or Badges: Focus Floor / Type A / Type B</span>
+      <span id="footer-help">Left-drag: Orbit · Right-drag: Pan · Scroll: Zoom · Click Building or Badges: Focus Floor / Type A / Type B</span>
     </div>
   </div>
 
@@ -292,8 +471,255 @@
 
     const container = document.getElementById('canvas-container');
     const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingText = document.getElementById('loading-text');
 
-    // 1. WebGLRenderer with AgX / ACES Tone Mapping & Soft Shadows
+    // =========================================================================
+    // 1. 16 Equirectangular 360° Panoramas Registry + Connected Walkthrough Graph
+    // =========================================================================
+    const PANORAMAS = [
+      // Building & Amenities (6)
+      {
+        id: 'pano_bldg_1_entrance_gate',
+        num: 1,
+        title: '1 · Entrance Gate & Canopy Drive',
+        short: 'Entrance Gate',
+        group: 'bldg',
+        category: 'Building & Amenities (6)',
+        level: 'Ground (0.0m)',
+        xy: [1.20, -2.50],
+        desc: 'Main vehicular & pedestrian entrance gate along the 18.0 m road with illuminated VIBGYOR signage and wooden soffit portal.',
+        links: ['pano_bldg_4_garden_stilt', 'pano_bldg_2_entrance_lobby']
+      },
+      {
+        id: 'pano_bldg_2_entrance_lobby',
+        num: 2,
+        title: '2 · Ground Floor Entrance Lobby & Lifts',
+        short: 'Entrance Lobby',
+        group: 'bldg',
+        category: 'Building & Amenities (6)',
+        level: 'Ground (+0.15m)',
+        xy: [6.60, 21.10],
+        desc: 'Air-conditioned ground-floor entrance foyer featuring travertine marble cladding, fluted wood wall, 2 bronze lifts, ring chandelier & lounge seating.',
+        links: ['pano_bldg_4_garden_stilt', 'pano_bldg_3_basement_parking', 'pano_type_a_1_drawing_room', 'pano_type_b_1_drawing_room', 'pano_bldg_5_terrace_pergola_kids']
+      },
+      {
+        id: 'pano_bldg_3_basement_parking',
+        num: 3,
+        title: '3 · Basement Parking & Curved Ramp',
+        short: 'Basement B1',
+        group: 'bldg',
+        category: 'Building & Amenities (6)',
+        level: 'Basement (-3.15m)',
+        xy: [6.20, 26.80],
+        desc: 'Basement level (-3.15 m) with yellow-striped car bays, 20 two-wheeler bays, safety-banded RCC columns, sloped curved ramp & industrial LED lighting.',
+        links: ['pano_bldg_2_entrance_lobby', 'pano_bldg_4_garden_stilt']
+      },
+      {
+        id: 'pano_bldg_4_garden_stilt',
+        num: 4,
+        title: '4 · Landscape Garden Deck & Stilt Parking',
+        short: 'Garden & Stilt',
+        group: 'bldg',
+        category: 'Building & Amenities (6)',
+        level: 'Ground (+0.05m)',
+        xy: [5.20, 13.50],
+        desc: 'Hollow-plinth stilt parking bays and West landscaped garden deck with timber benches, bollards, and perimeter greenery.',
+        links: ['pano_bldg_1_entrance_gate', 'pano_bldg_2_entrance_lobby', 'pano_bldg_3_basement_parking']
+      },
+      {
+        id: 'pano_bldg_5_terrace_pergola_kids',
+        num: 5,
+        title: '5 · Terrace Pergola Lounge & Kids\' Play Area',
+        short: 'Terrace Pergola',
+        group: 'bldg',
+        category: 'Building & Amenities (6)',
+        level: 'Terrace (+24.7m)',
+        xy: [7.35, 11.80],
+        desc: 'South terrace deck featuring dual slatted pergola bays with warm cage lanterns, outdoor L-sofas, and soft-fall EPDM kids\' play area.',
+        links: ['pano_bldg_6_terrace_gym', 'pano_bldg_2_entrance_lobby']
+      },
+      {
+        id: 'pano_bldg_6_terrace_gym',
+        num: 6,
+        title: '6 · Terrace Fitness Gym & Yoga Deck',
+        short: 'Terrace Gym',
+        group: 'bldg',
+        category: 'Building & Amenities (6)',
+        level: 'Terrace (+24.7m)',
+        xy: [5.80, 30.80],
+        desc: 'Glass-walled rooftop fitness gym pavilion with central sprint track, curved treadmills, air bikes, dumbbell rack, solar PV roof & adjacent yoga deck.',
+        links: ['pano_bldg_5_terrace_pergola_kids', 'pano_bldg_2_entrance_lobby']
+      },
+
+      // Type A Interior (5)
+      {
+        id: 'pano_type_a_1_drawing_room',
+        num: 7,
+        title: '7 · Type A — Drawing Room (6.53 × 3.65 m)',
+        short: 'A · Drawing Room',
+        group: 'typeA',
+        category: 'Type A Interior (Front 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [8.10, 13.25],
+        desc: 'Front 4BHK Drawing Room with L-shaped sectional sofa, nested marble/brass coffee tables, sage/wood feature wall & East balcony access.',
+        links: ['pano_type_a_2_dining_kitchen', 'pano_type_a_4_second_bedroom', 'pano_type_a_5_balcony_deck', 'pano_bldg_2_entrance_lobby']
+      },
+      {
+        id: 'pano_type_a_2_dining_kitchen',
+        num: 8,
+        title: '8 · Type A — Kitchen & Dining (6.59 × 3.20 m)',
+        short: 'A · Kitchen/Dining',
+        group: 'typeA',
+        category: 'Type A Interior (Front 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [5.85, 10.15],
+        desc: 'Open-plan 6-seater dining table with linear brass chandelier and L-shaped quartz kitchen counter with coral breakfast barstools.',
+        links: ['pano_type_a_1_drawing_room', 'pano_type_a_3_master_bedroom', 'pano_type_a_4_second_bedroom', 'pano_type_a_5_balcony_deck']
+      },
+      {
+        id: 'pano_type_a_3_master_bedroom',
+        num: 9,
+        title: '9 · Type A — Master Bedroom SE (3.96 × 5.02 m)',
+        short: 'A · Master Bed',
+        group: 'typeA',
+        category: 'Type A Interior (Front 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [10.55, 3.85],
+        desc: 'South-East corner Master Suite with king bed, olive accent pillows, fluted headboard wall, floating nightstands & full-height wardrobe.',
+        links: ['pano_type_a_2_dining_kitchen', 'pano_type_a_5_balcony_deck']
+      },
+      {
+        id: 'pano_type_a_4_second_bedroom',
+        num: 10,
+        title: '10 · Type A — Second Bedroom (4.56 × 3.20 m)',
+        short: 'A · Second Bed',
+        group: 'typeA',
+        category: 'Type A Interior (Front 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [10.45, 9.85],
+        desc: 'Middle-East bedroom with upholstered queen bed, cove lighting, sheer window curtains, and sliding cream wardrobe.',
+        links: ['pano_type_a_2_dining_kitchen', 'pano_type_a_1_drawing_room']
+      },
+      {
+        id: 'pano_type_a_5_balcony_deck',
+        num: 11,
+        title: '11 · Type A — Third Bedroom SW (3.36 × 4.20 m)',
+        short: 'A · Third Bed SW',
+        group: 'typeA',
+        category: 'Type A Interior (Front 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [4.85, 6.35],
+        desc: 'South-West bedroom overlooking the front landscaped setback and 18m main road with teal accent bedding and wardrobe.',
+        links: ['pano_type_a_2_dining_kitchen', 'pano_type_a_3_master_bedroom', 'pano_type_a_1_drawing_room']
+      },
+
+      // Type B Interior (5)
+      {
+        id: 'pano_type_b_1_drawing_room',
+        num: 12,
+        title: '12 · Type B — Drawing Room (6.31 × 3.65 m)',
+        short: 'B · Drawing Room',
+        group: 'typeB',
+        category: 'Type B Interior (Rear 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [4.85, 28.15],
+        desc: 'Rear 4BHK Drawing Room opening onto the West landscape balcony deck with L-sofa, nested coffee tables & TV console wall.',
+        links: ['pano_type_b_2_dining_kitchen', 'pano_type_b_5_balcony_deck', 'pano_bldg_2_entrance_lobby']
+      },
+      {
+        id: 'pano_type_b_2_dining_kitchen',
+        num: 13,
+        title: '13 · Type B — Kitchen & Dining (6.11 × 3.20 m)',
+        short: 'B · Kitchen/Dining',
+        group: 'typeB',
+        category: 'Type B Interior (Rear 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [6.65, 31.55],
+        desc: 'Type B central 6-seater dining room and East modular quartz kitchen with breakfast counter and coral barstools.',
+        links: ['pano_type_b_1_drawing_room', 'pano_type_b_3_master_bedroom', 'pano_type_b_4_second_bedroom', 'pano_type_b_5_balcony_deck']
+      },
+      {
+        id: 'pano_type_b_3_master_bedroom',
+        num: 14,
+        title: '14 · Type B — Master Bedroom NE (5.34 × 3.65 m)',
+        short: 'B · Master Bed',
+        group: 'typeB',
+        category: 'Type B Interior (Rear 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [7.45, 36.25],
+        desc: 'North-East Master Bedroom with king bed, olive pillows, warm cove ceiling, sheer curtains, and East wardrobe.',
+        links: ['pano_type_b_2_dining_kitchen', 'pano_type_b_4_second_bedroom']
+      },
+      {
+        id: 'pano_type_b_4_second_bedroom',
+        num: 15,
+        title: '15 · Type B — Second Bedroom NW (4.73 × 3.35 m)',
+        short: 'B · Second Bed',
+        group: 'typeB',
+        category: 'Type B Interior (Rear 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [2.65, 34.65],
+        desc: 'North-West corner bedroom with dual-aspect daylight, upholstered bed, floating nightstands, and full-height wardrobe.',
+        links: ['pano_type_b_2_dining_kitchen', 'pano_type_b_3_master_bedroom', 'pano_type_b_5_balcony_deck']
+      },
+      {
+        id: 'pano_type_b_5_balcony_deck',
+        num: 16,
+        title: '16 · Type B — Third Bedroom Mid-West (3.20 × 3.96 m)',
+        short: 'B · Third Bed',
+        group: 'typeB',
+        category: 'Type B Interior (Rear 4BHK)',
+        level: 'Floor 1 (+3.30m)',
+        xy: [2.35, 31.65],
+        desc: 'Middle-West bedroom with headboard along the West wall, teal cushions, recessed LED tray ceiling, and wardrobe.',
+        links: ['pano_type_b_2_dining_kitchen', 'pano_type_b_1_drawing_room', 'pano_type_b_4_second_bedroom']
+      }
+    ];
+
+    // Stills Gallery Registry (5 Amenity + 8 Interior + 4 Exterior = 17 Renders @ 2560x1440)
+    const GALLERY_SECTIONS = [
+      {
+        title: 'Amenity Stills (5 Views · 2560 × 1440 px)',
+        items: [
+          { title: 'Amenity 1 · Basement Parking', sub: 'Car bays, 20 two-wheeler bays, sloped ramp, safety columns & LEDs', paths: ['./amenities/amenity_1_basement_parking.png', '../outputs/amenities/amenity_1_basement_parking.png'] },
+          { title: 'Amenity 2 · Ground Stilt Parking', sub: 'Hollow-plinth parking bays, parked sedans, columns & soffit lights', paths: ['./amenities/amenity_2_stilt_parking.png', '../outputs/amenities/amenity_2_stilt_parking.png'] },
+          { title: 'Amenity 3 · Entrance Lobby & Lifts', sub: 'Travertine marble, fluted wood wall, bronze lifts, chandelier & sofa', paths: ['./amenities/amenity_3_entrance_lobby.png', '../outputs/amenities/amenity_3_entrance_lobby.png'] },
+          { title: 'Amenity 4 · Landscape Garden & Drive', sub: 'West wooden deck benches, planter shrubs, bollards & entrance drive', paths: ['./amenities/amenity_4_landscape_drive.png', '../outputs/amenities/amenity_4_landscape_drive.png'] },
+          { title: 'Amenity 5 · Terrace Amenities', sub: 'Slatted pergola seating lounge, kids\' play area & glass fitness gym', paths: ['./amenities/amenity_5_terrace_amenities.png', '../outputs/amenities/amenity_5_terrace_amenities.png'] },
+        ]
+      },
+      {
+        title: 'Type A (Front 4BHK · 160.05 sq.m) Interior Stills (4 Views · 2560 × 1440 px)',
+        items: [
+          { title: 'Type A · Drawing Room (6.53 × 3.65 m)', sub: 'L-shaped sofa, nested coffee tables, fluted wall & East balcony light', paths: ['./interiors/type_a_1_drawing_room.png', '../outputs/interiors/type_a_1_drawing_room.png'] },
+          { title: 'Type A · Kitchen & Dining (6.59 × 3.20 m)', sub: '6-seater dining table, quartz L-counter & coral breakfast barstools', paths: ['./interiors/type_a_2_kitchen_dining.png', '../outputs/interiors/type_a_2_kitchen_dining.png'] },
+          { title: 'Type A · Master Bedroom SE (3.96 × 5.02 m)', sub: 'King bed, olive pillows, fluted headboard wall & sliding wardrobe', paths: ['./interiors/type_a_3_master_bedroom.png', '../outputs/interiors/type_a_3_master_bedroom.png'] },
+          { title: 'Type A · Second Bedroom (4.56 × 3.20 m)', sub: 'Queen bed, warm perimeter cove lighting, sheer curtains & wardrobe', paths: ['./interiors/type_a_4_second_bedroom.png', '../outputs/interiors/type_a_4_second_bedroom.png'] },
+        ]
+      },
+      {
+        title: 'Type B (Rear 4BHK · 143.18 sq.m) Interior Stills (4 Views · 2560 × 1440 px)',
+        items: [
+          { title: 'Type B · Drawing Room (6.31 × 3.65 m)', sub: 'Rear wing living room opening onto the West balcony deck', paths: ['./interiors/type_b_1_drawing_room.png', '../outputs/interiors/type_b_1_drawing_room.png'] },
+          { title: 'Type B · Kitchen & Dining (6.11 × 3.20 m)', sub: '6-seater dining area and East modular kitchen with breakfast counter', paths: ['./interiors/type_b_2_kitchen_dining.png', '../outputs/interiors/type_b_2_kitchen_dining.png'] },
+          { title: 'Type B · Master Bedroom NE (5.34 × 3.65 m)', sub: 'North-East corner Master Suite with king bed & cove lighting', paths: ['./interiors/type_b_3_master_bedroom.png', '../outputs/interiors/type_b_3_master_bedroom.png'] },
+          { title: 'Type B · Second Bedroom NW (4.73 × 3.35 m)', sub: 'North-West bedroom with upholstered bed, nightstands & wardrobe', paths: ['./interiors/type_b_4_second_bedroom.png', '../outputs/interiors/type_b_4_second_bedroom.png'] },
+        ]
+      },
+      {
+        title: 'Exterior Architectural Stills (4 Views · 2560 × 1440 px)',
+        items: [
+          { title: 'Exterior 1 · Eye-Level from Main Road (Day)', sub: 'Full 7-storey elevation, vertical fins, balconies & entrance gate', paths: ['./exteriors/shot_1_eye_level_day.png', '../outputs/shot_1_eye_level_day.png'] },
+          { title: 'Exterior 2 · Front Corner (Dusk)', sub: 'Warm interior room illumination, balcony soffit LEDs & glowing sign', paths: ['./exteriors/shot_2_front_corner_dusk.png', '../outputs/shot_2_front_corner_dusk.png'] },
+          { title: 'Exterior 3 · Aerial 45° Overview (Day)', sub: 'Complete plot boundary, 18m main road, terrace amenities & solar roof', paths: ['./exteriors/shot_3_aerial_day.png', '../outputs/shot_3_aerial_day.png'] },
+          { title: 'Exterior 4 · Entrance Canopy Close-Up (Day)', sub: 'Wooden soffit portal, security cabin, VIBGYOR brass letters & planter', paths: ['./exteriors/shot_4_entrance_closeup.png', '../outputs/shot_4_entrance_closeup.png'] },
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 2. Three.js Renderer, 3D Building Scene & 360° Equirectangular Sphere Scene
+    // =========================================================================
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -303,40 +729,58 @@
     renderer.toneMappingExposure = 1.05;
     container.appendChild(renderer.domElement);
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x9ec2df);
+    // --- SCENE A: 3D Building Model (.glb) ---
+    const scene3D = new THREE.Scene();
+    scene3D.background = new THREE.Color(0x9ec2df);
 
-    // Note: Blender glTF export uses Y-up where (X_b, Y_b, Z_b) -> (X_b, Z_b, -Y_b)
-    // Building footprint in Three.js Y-up:
-    //   X in [0, 13.12], Y (height) in [0, 30.1], Z in [-38.73, 0]
-    //   Type A (Front wing facing road): Z in [-19.6, +0.6]
-    //   Type B (Rear/North wing):        Z in [-39.3, -19.6]
-    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.2, 400);
-    camera.position.set(-16, 14, 24);
+    const camera3D = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.2, 400);
+    camera3D.position.set(-16, 14, 24);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.07;
-    controls.target.set(6.5, 11.5, -16.0);
-    controls.maxPolarAngle = Math.PI * 0.495;
-    controls.minDistance = 2.5;
-    controls.maxDistance = 140;
-    controls.update();
+    const controls3D = new OrbitControls(camera3D, renderer.domElement);
+    controls3D.enableDamping = true;
+    controls3D.dampingFactor = 0.07;
+    controls3D.target.set(6.5, 11.5, -16.0);
+    controls3D.maxPolarAngle = Math.PI * 0.495;
+    controls3D.minDistance = 2.0;
+    controls3D.maxDistance = 140;
+    controls3D.update();
 
-    // Smooth camera flight state
+    // --- SCENE B: 360° Equirectangular Panorama Viewer ---
+    const scenePano = new THREE.Scene();
+    const cameraPano = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200);
+    cameraPano.position.set(0, 0, 0);
+
+    const sphereGeom = new THREE.SphereGeometry(60, 64, 32);
+    // Invert sphere on X axis so equirectangular texture faces inward
+    sphereGeom.scale(-1, 1, 1);
+    const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const panoSphere = new THREE.Mesh(sphereGeom, sphereMat);
+    scenePano.add(panoSphere);
+
+    let activeMode = '3d'; // '3d' | '360' | 'gallery'
+    let currentPano = PANORAMAS[0];
+    let panoLon = 90;  // yaw in degrees
+    let panoLat = 0;   // pitch in degrees
+    let isDraggingPano = false;
+    let dragStartX = 0, dragStartY = 0;
+    let dragStartLon = 0, dragStartLat = 0;
+    const panoTextureCache = new Map();
+    const texLoader = new THREE.TextureLoader();
+
+    // Smooth camera flight state for 3D mode
     let camAnim = null;
     function flyCameraTo(targetPos, targetLookAt, durationMs = 650) {
       camAnim = {
-        startPos: camera.position.clone(),
+        startPos: camera3D.position.clone(),
         endPos: new THREE.Vector3(...targetPos),
-        startTarget: controls.target.clone(),
+        startTarget: controls3D.target.clone(),
         endTarget: new THREE.Vector3(...targetLookAt),
         startTime: performance.now(),
         duration: durationMs
       };
     }
 
-    // 2. Sun & Fill Lights with Shadows
+    // Sun & Fill Lights for 3D Scene
     const sunLight = new THREE.DirectionalLight(0xfff5e4, 3.2);
     sunLight.position.set(28, 42, 32);
     sunLight.castShadow = true;
@@ -350,12 +794,11 @@
     sunLight.shadow.camera.top = d;
     sunLight.shadow.camera.bottom = -d;
     sunLight.shadow.bias = -0.0005;
-    scene.add(sunLight);
+    scene3D.add(sunLight);
 
     const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x3f3f46, 0.85);
-    scene.add(hemiLight);
+    scene3D.add(hemiLight);
 
-    // Dusk warm interior point lights group
     const duskLightsGroup = new THREE.Group();
     duskLightsGroup.visible = false;
     for (let fl = 1; fl <= 7; fl++) {
@@ -369,21 +812,17 @@
     const canopyLight = new THREE.PointLight(0xffb464, 28, 16, 1.4);
     canopyLight.position.set(1.5, 2.7, -0.5);
     duskLightsGroup.add(canopyLight);
-    scene.add(duskLightsGroup);
+    scene3D.add(duskLightsGroup);
 
-    // 3. 3D Highlight Volumes for Selected Floor, Type A (Front), and Type B (Rear)
+    // 3D Highlight Volumes
     const highlightGroup = new THREE.Group();
-    scene.add(highlightGroup);
+    scene3D.add(highlightGroup);
 
     function createHighlightBox(width, height, depth, colorHex, opacity = 0.24) {
       const group = new THREE.Group();
       const geom = new THREE.BoxGeometry(width, height, depth);
       const mat = new THREE.MeshBasicMaterial({
-        color: colorHex,
-        transparent: true,
-        opacity: opacity,
-        depthWrite: false,
-        side: THREE.DoubleSide
+        color: colorHex, transparent: true, opacity: opacity, depthWrite: false, side: THREE.DoubleSide
       });
       const mesh = new THREE.Mesh(geom, mat);
       const edges = new THREE.EdgesGeometry(geom);
@@ -395,48 +834,45 @@
       return group;
     }
 
-    // Type A (Front Wing: X in [-0.4, 13.6], Z in [-19.6, +0.8])
     const boxTypeA = createHighlightBox(14.2, 3.05, 20.4, 0xff7b24, 0.22);
-    // Type B (Rear Wing: X in [-0.4, 13.6], Z in [-39.2, -19.6])
     const boxTypeB = createHighlightBox(14.2, 3.05, 19.6, 0x4ade80, 0.22);
-    // Full Floor Box (Stilt / Terrace)
-    const boxFullFloor = createHighlightBox(14.4, 3.30, 39.8, 0x38bdf8, 0.18);
+    const boxFullFloor = createHighlightBox(14.8, 3.30, 40.2, 0x38bdf8, 0.18);
 
-    // 4. Load Poly Haven HDRI for realistic reflections & sky
+    // Load Poly Haven HDRI
     const rgbeLoader = new RGBELoader();
     rgbeLoader.load(
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloppenheim_06_puresky_1k.hdr',
       (texture) => {
         texture.mapping = THREE.EquirectangularReflectionMapping;
-        scene.environment = texture;
-        scene.background = texture;
-        scene.backgroundIntensity = 0.85;
-        scene.environmentIntensity = 0.9;
+        scene3D.environment = texture;
+        scene3D.background = texture;
+        scene3D.backgroundIntensity = 0.85;
+        scene3D.environmentIntensity = 0.9;
       },
       undefined,
-      () => { /* fallback procedural sky background stays active if offline */ }
+      () => {}
     );
 
-    // 5. Floor & Flat Metadata Registry
+    // Floor Registry (including Basement B1!)
     const FLOORS_META = [
-      { index: 8, label: 'Terrace & Cabin', badge: 'Roof', isRes: false, y0: 24.70, h: 5.40, desc: 'Open Terrace, Parapet (1.15 m), Stair Cabin (+3.0 m) & Overhead Water Tank (+2.4 m).' },
-      { index: 7, label: '7th Floor', isRes: true, y0: 21.60, h: 3.10 },
-      { index: 6, label: '6th Floor', isRes: true, y0: 18.55, h: 3.05 },
-      { index: 5, label: '5th Floor', isRes: true, y0: 15.50, h: 3.05 },
-      { index: 4, label: '4th Floor', isRes: true, y0: 12.45, h: 3.05 },
-      { index: 3, label: '3rd Floor', isRes: true, y0: 9.40,  h: 3.05 },
-      { index: 2, label: '2nd Floor', isRes: true, y0: 6.35,  h: 3.05 },
-      { index: 1, label: '1st Floor', isRes: true, y0: 3.30,  h: 3.05 },
-      { index: 0, label: 'Ground (Stilt)', badge: 'Parking', isRes: false, y0: 0.0, h: 3.30, desc: 'Hollow Plinth Stilt Parking (3.30 m height), Entrance Foyer, 2 Lifts & Core Staircase.' }
+      { index: 8,  label: 'Terrace & Amenities', badge: 'Gym/Lounge', isRes: false, y0: 24.70, h: 5.40, desc: 'Open Terrace (+24.70 m): Slatted Pergola Lounge, Kids\' Play Area, Glass Fitness Gym with Solar Roof & Yoga Deck.' },
+      { index: 7,  label: '7th Floor', isRes: true, y0: 21.60, h: 3.10 },
+      { index: 6,  label: '6th Floor', isRes: true, y0: 18.55, h: 3.05 },
+      { index: 5,  label: '5th Floor', isRes: true, y0: 15.50, h: 3.05 },
+      { index: 4,  label: '4th Floor', isRes: true, y0: 12.45, h: 3.05 },
+      { index: 3,  label: '3rd Floor', isRes: true, y0: 9.40,  h: 3.05 },
+      { index: 2,  label: '2nd Floor', isRes: true, y0: 6.35,  h: 3.05 },
+      { index: 1,  label: '1st Floor (Furnished)', isRes: true, y0: 3.30,  h: 3.05 },
+      { index: 0,  label: 'Ground (Stilt & Lobby)', badge: 'Lobby/Stilt', isRes: false, y0: 0.0, h: 3.30, desc: 'Ground Floor (+0.00 m): Entrance Lobby with Travertine & Fluted Wood, 2 Bronze Lifts, Stilt Parking Bays & Garden Deck.' },
+      { index: -1, label: 'Basement (B1 Parking)', badge: 'Ramp/Bays', isRes: false, y0: -3.15, h: 3.15, desc: 'Basement Parking (-3.15 m): Two-Way Curved Ramp, Car Bays, 20 Two-Wheeler Bays, Safety-Banded Columns & Ceiling LEDs.' }
     ];
 
-    const floorMeshes = new Map(); // floorIndex -> Array of Mesh
+    const floorMeshes = new Map();
     const allBuildingMeshes = [];
     let selectedFloor = null;
-    let selectedUnit = null; // null | 'A' | 'B'
+    let selectedUnit = null;
     let cutawayEnabled = false;
 
-    // Build Floor Selector UI with separate clickable Floor label, Type A badge, and Type B badge
     const floorListEl = document.getElementById('floor-list');
     FLOORS_META.forEach((f) => {
       floorMeshes.set(f.index, []);
@@ -448,8 +884,8 @@
         row.innerHTML = `
           <span class="floor-label-btn">${f.label}</span>
           <span class="floor-badges">
-            <span class="badge badge-a" data-unit="A" title="Click to focus Flat ${f.index}01 (Type A Front)">${f.index}01 · Type A</span>
-            <span class="badge badge-b" data-unit="B" title="Click to focus Flat ${f.index}02 (Type B Rear)">${f.index}02 · Type B</span>
+            <span class="badge badge-a" data-unit="A">${f.index}01 · Type A</span>
+            <span class="badge badge-b" data-unit="B">${f.index}02 · Type B</span>
           </span>
         `;
         row.querySelector('.floor-label-btn').addEventListener('click', (e) => {
@@ -475,7 +911,6 @@
       floorListEl.appendChild(row);
     });
 
-    // Also make the two detail cards at the bottom clickable to focus Type A or Type B!
     document.getElementById('card-type-a').addEventListener('click', () => {
       if (selectedFloor !== null && selectedFloor >= 1 && selectedFloor <= 7) {
         selectFloorAndUnit(selectedFloor, 'A', true);
@@ -487,13 +922,13 @@
       }
     });
 
-    // 6. Load Generated .glb Model
+    // Load .glb Model
     const gltfLoader = new GLTFLoader();
     const glbCandidates = ['./vibgyor.glb', '../outputs/vibgyor.glb'];
 
     function loadModel(idx = 0) {
       if (idx >= glbCandidates.length) {
-        document.getElementById('loading-text').textContent = 'Could not load vibgyor.glb';
+        loadingText.textContent = 'Could not load vibgyor.glb';
         return;
       }
       gltfLoader.load(
@@ -508,18 +943,16 @@
               child.userData.origEmissive = child.material.emissive ? child.material.emissive.clone() : new THREE.Color(0x000000);
               child.userData.origEmissiveIntensity = child.material.emissiveIntensity || 0;
 
-              // Parse floor index from custom extras or mesh/parent name
               let fIdx = child.userData?.floor_index ?? child.parent?.userData?.floor_index;
               const fullName = `${child.name || ''} ${child.parent?.name || ''}`;
               if (fIdx === undefined) {
-                const m = fullName.match(/Floor_(\d+)/);
-                if (m) fIdx = parseInt(m[1], 10);
+                if (fullName.includes('Basement_')) fIdx = -1;
+                else if (fullName.includes('Terrace_')) fIdx = 8;
+                else {
+                  const m = fullName.match(/Floor_(\d+)/);
+                  if (m) fIdx = parseInt(m[1], 10);
+                }
               }
-              // Floor 1 interior furniture meshes start with TypeA_
-              if (fIdx === undefined && fullName.includes('TypeA_')) {
-                fIdx = 1;
-              }
-
               if (fIdx !== undefined && floorMeshes.has(fIdx)) {
                 child.userData.floorIndex = fIdx;
                 if (fullName.includes('TypeA')) child.userData.unitType = 'A';
@@ -529,7 +962,7 @@
               }
             }
           });
-          scene.add(root);
+          scene3D.add(root);
           loadingOverlay.style.opacity = '0';
           setTimeout(() => (loadingOverlay.style.display = 'none'), 350);
         },
@@ -539,14 +972,11 @@
     }
     loadModel(0);
 
-    // 7. Interactive Floor + Unit (Type A / Type B) Selection, Highlighting, Cutaway & Camera Focus
     function updateCutawayVisibility() {
       FLOORS_META.forEach((f) => {
         const meshes = floorMeshes.get(f.index) || [];
         const shouldHide = cutawayEnabled && selectedFloor !== null && f.index > selectedFloor;
-        meshes.forEach((m) => {
-          m.visible = !shouldHide;
-        });
+        meshes.forEach((m) => { m.visible = !shouldHide; });
       });
     }
 
@@ -554,7 +984,6 @@
       selectedFloor = floorIdx;
       selectedUnit = unitType;
 
-      // Update UI active states
       document.querySelectorAll('.floor-row').forEach((row) => {
         const rFloor = parseInt(row.dataset.floor, 10);
         row.classList.toggle('active', rFloor === floorIdx);
@@ -567,7 +996,6 @@
       document.getElementById('card-type-a').classList.toggle('selected', unitType === 'A');
       document.getElementById('card-type-b').classList.toggle('selected', unitType === 'B');
 
-      // Reset all building mesh emissive tints
       allBuildingMeshes.forEach((mesh) => {
         if (mesh.material && mesh.material.emissive) {
           mesh.material.emissive.copy(mesh.userData.origEmissive);
@@ -604,7 +1032,6 @@
       const meshes = floorMeshes.get(floorIdx) || [];
 
       if (meta.isRes) {
-        // Position 3D highlight volumes at this residential floor's exact height
         boxTypeA.position.set(6.56, yCenter, -9.4);
         boxTypeB.position.set(6.56, yCenter, -29.4);
 
@@ -617,18 +1044,15 @@
               mesh.material.emissiveIntensity = 0.85;
             } else if (mesh.userData.unitType !== 'B') {
               mesh.material.emissive.setHex(0xd97736);
-              mesh.material.emissiveIntensity = 0.30;
+              mesh.material.emissiveIntensity = 0.25;
             }
           });
           bannerEl.classList.add('visible');
           bannerDotEl.style.background = '#d97736';
           bannerTextEl.textContent = `${meta.label} · Flat ${floorIdx}01 (Type A — Front 4BHK, 160.05 sq.m)`;
           if (animateCam) {
-            if (cutawayEnabled) {
-              flyCameraTo([-10.0, meta.y0 + 18.0, 4.0], [6.5, meta.y0 + 1.0, -9.5]);
-            } else {
-              flyCameraTo([-11.0, yCenter + 2.5, 12.0], [6.5, yCenter, -8.5]);
-            }
+            if (cutawayEnabled) flyCameraTo([-8.0, meta.y0 + 16.0, 2.0], [6.5, meta.y0 + 1.0, -9.5]);
+            else flyCameraTo([-11.0, yCenter + 2.5, 12.0], [6.5, yCenter, -8.5]);
           }
         } else if (unitType === 'B') {
           boxTypeB.visible = true;
@@ -639,46 +1063,38 @@
               mesh.material.emissiveIntensity = 0.85;
             } else if (mesh.userData.unitType !== 'A') {
               mesh.material.emissive.setHex(0x689f75);
-              mesh.material.emissiveIntensity = 0.30;
+              mesh.material.emissiveIntensity = 0.25;
             }
           });
           bannerEl.classList.add('visible');
           bannerDotEl.style.background = '#4ade80';
           bannerTextEl.textContent = `${meta.label} · Flat ${floorIdx}02 (Type B — Rear Wing 4BHK, 143.18 sq.m)`;
           if (animateCam) {
-            if (cutawayEnabled) {
-              flyCameraTo([-12.0, meta.y0 + 18.0, -42.0], [6.5, meta.y0 + 1.0, -29.0]);
-            } else {
-              // Orbit to North-West corner so the Rear Wing (Type B) is front-and-center!
-              flyCameraTo([-16.0, yCenter + 3.0, -42.0], [6.5, yCenter, -28.5]);
-            }
+            if (cutawayEnabled) flyCameraTo([-10.0, meta.y0 + 16.0, -40.0], [6.5, meta.y0 + 1.0, -29.5]);
+            else flyCameraTo([-16.0, yCenter + 3.0, -42.0], [6.5, yCenter, -28.5]);
           }
         } else {
-          // Whole residential floor selected: show both Type A (orange) and Type B (green) volumes!
           boxTypeA.visible = true;
           boxTypeB.visible = true;
           meshes.forEach((mesh) => {
             if (!mesh.material?.emissive) return;
             if (mesh.userData.unitType === 'A') {
               mesh.material.emissive.setHex(0xff7b24);
-              mesh.material.emissiveIntensity = 0.70;
+              mesh.material.emissiveIntensity = 0.65;
             } else if (mesh.userData.unitType === 'B') {
               mesh.material.emissive.setHex(0x4ade80);
-              mesh.material.emissiveIntensity = 0.70;
+              mesh.material.emissiveIntensity = 0.65;
             } else {
               mesh.material.emissive.setHex(0xe59849);
-              mesh.material.emissiveIntensity = 0.42;
+              mesh.material.emissiveIntensity = 0.35;
             }
           });
           bannerEl.classList.add('visible');
           bannerDotEl.style.background = '#f59e0b';
           bannerTextEl.textContent = `${meta.label} (+${meta.y0.toFixed(2)} m) · Flats ${floorIdx}01 (Type A) & ${floorIdx}02 (Type B)`;
           if (animateCam) {
-            if (cutawayEnabled) {
-              flyCameraTo([-16.0, meta.y0 + 24.0, 2.0], [6.5, meta.y0 + 1.0, -19.0]);
-            } else {
-              flyCameraTo([-18.0, yCenter + 3.5, 14.0], [6.5, yCenter, -16.0]);
-            }
+            if (cutawayEnabled) flyCameraTo([-14.0, meta.y0 + 22.0, 0.0], [6.5, meta.y0 + 1.0, -19.0]);
+            else flyCameraTo([-18.0, yCenter + 3.5, 14.0], [6.5, yCenter, -16.0]);
           }
         }
 
@@ -688,28 +1104,33 @@
         document.getElementById('flat-a-title').textContent = `Flat ${floorIdx}01 · Type A (Front Wing)`;
         document.getElementById('flat-b-title').textContent = `Flat ${floorIdx}02 · Type B (Rear Wing)`;
       } else {
-        // Ground (Stilt) or Terrace
         boxFullFloor.position.set(6.56, yCenter, -19.3);
         boxFullFloor.visible = true;
         meshes.forEach((mesh) => {
           if (mesh.material?.emissive) {
             mesh.material.emissive.setHex(0x38bdf8);
-            mesh.material.emissiveIntensity = 0.40;
+            mesh.material.emissiveIntensity = 0.35;
           }
         });
         bannerEl.classList.add('visible');
         bannerDotEl.style.background = '#38bdf8';
-        bannerTextEl.textContent = `${meta.label} (+${meta.y0.toFixed(2)} m)`;
-        titleEl.textContent = `${meta.label} (+${meta.y0.toFixed(2)} m)`;
+        bannerTextEl.textContent = `${meta.label} (${meta.y0 >= 0 ? '+' : ''}${meta.y0.toFixed(2)} m)`;
+        titleEl.textContent = `${meta.label} (${meta.y0 >= 0 ? '+' : ''}${meta.y0.toFixed(2)} m)`;
         subEl.style.display = 'block';
         subEl.textContent = meta.desc;
         flatsContainer.style.display = 'none';
 
         if (animateCam) {
-          if (floorIdx === 0) {
+          if (floorIdx === -1) {
+            cutawayEnabled = true;
+            btnCutaway.classList.add('active');
+            btnCutaway.textContent = 'Slice / Cutaway Upper Floors: ON';
+            updateCutawayVisibility();
+            flyCameraTo([-12.0, 14.0, -40.0], [5.5, -1.5, -24.0]);
+          } else if (floorIdx === 0) {
             flyCameraTo([-12.0, 4.5, 16.0], [6.5, 1.8, -10.0]);
           } else {
-            flyCameraTo([-18.0, 34.0, 14.0], [6.5, 26.0, -18.0]);
+            flyCameraTo([-14.0, 33.0, -4.0], [6.5, 25.5, -20.0]);
           }
         }
       }
@@ -725,57 +1146,25 @@
       flyCameraTo([-16, 14, 24], [6.5, 11.5, -16.0]);
     });
 
-    // Cutaway Upper Floors Toggle Button
     const btnCutaway = document.getElementById('btn-cutaway');
     btnCutaway.addEventListener('click', () => {
       cutawayEnabled = !cutawayEnabled;
       btnCutaway.classList.toggle('active', cutawayEnabled);
       btnCutaway.textContent = `Slice / Cutaway Upper Floors: ${cutawayEnabled ? 'ON' : 'OFF'}`;
       if (selectedFloor === null && cutawayEnabled) {
-        // Default to 3rd Floor if user turns on cutaway before picking a floor
-        selectFloorAndUnit(3, null, true);
+        selectFloorAndUnit(1, null, true);
       } else {
         selectFloorAndUnit(selectedFloor, selectedUnit, true);
       }
     });
 
-    // Raycast on click (detect both Floor AND whether the user clicked the Front/Type A half or Rear/Type B half!)
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    let downPos = { x: 0, y: 0 };
-
-    renderer.domElement.addEventListener('pointerdown', (e) => {
-      downPos = { x: e.clientX, y: e.clientY };
-    });
-    renderer.domElement.addEventListener('pointerup', (e) => {
-      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 5) return;
-      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
-      const visibleBuildingMeshes = allBuildingMeshes.filter((m) => m.visible);
-      const hits = raycaster.intersectObjects(visibleBuildingMeshes, false);
-      if (hits.length > 0 && hits[0].object.userData.floorIndex !== undefined) {
-        const hitFloor = hits[0].object.userData.floorIndex;
-        const hitPt = hits[0].point;
-        // Determine if user clicked Type A (Front half: z > -19.6) or Type B (Rear half: z <= -19.6)
-        let hitUnit = hits[0].object.userData.unitType || null;
-        if (hitFloor >= 1 && hitFloor <= 7 && !hitUnit) {
-          // If the floor is already selected, clicking the front/rear wing focuses Type A / Type B
-          if (selectedFloor === hitFloor) {
-            hitUnit = hitPt.z > -19.6 ? 'A' : 'B';
-          }
-        }
-        selectFloorAndUnit(hitFloor, hitUnit, true);
-      }
-    });
-
-    // 8. Camera Presets & Lighting Mode Switch
     const CAM_PRESETS = {
       eye:      { pos: [0.5, 2.0, 24.5],    target: [6.2, 11.2, -4.0] },
       corner:   { pos: [-13.5, 2.5, 21.0],  target: [6.0, 11.0, -7.5] },
       aerial:   { pos: [-23.0, 35.0, 27.0], target: [6.5, 9.5, -14.0] },
       entrance: { pos: [3.0, 1.8, 12.5],    target: [4.8, 2.2, 0.5] },
-      interior: { pos: [6.8, 4.75, -11.5],  target: [8.8, 4.65, -15.2] }
+      terrace:  { pos: [14.5, 28.5, -18.5], target: [5.5, 25.5, -12.0] },
+      interior: { pos: [5.5, 4.72, -12.2],  target: [9.4, 4.65, -14.3] }
     };
 
     document.querySelectorAll('[data-cam]').forEach((btn) => {
@@ -783,9 +1172,10 @@
         const preset = CAM_PRESETS[btn.dataset.cam];
         if (!preset) return;
         if (btn.dataset.cam === 'interior') {
-          cutawayEnabled = false;
-          btnCutaway.classList.remove('active');
-          btnCutaway.textContent = 'Slice / Cutaway Upper Floors: OFF';
+          selectedFloor = 1;
+          cutawayEnabled = true;
+          btnCutaway.classList.add('active');
+          btnCutaway.textContent = 'Slice / Cutaway Upper Floors: ON';
           updateCutawayVisibility();
         }
         flyCameraTo(preset.pos, preset.target, 700);
@@ -799,8 +1189,8 @@
       btnDusk.classList.remove('active');
       sunLight.intensity = 3.2;
       hemiLight.intensity = 0.85;
-      scene.backgroundIntensity = 0.85;
-      scene.environmentIntensity = 0.90;
+      scene3D.backgroundIntensity = 0.85;
+      scene3D.environmentIntensity = 0.90;
       duskLightsGroup.visible = false;
     });
     btnDusk.addEventListener('click', () => {
@@ -808,18 +1198,441 @@
       btnDay.classList.remove('active');
       sunLight.intensity = 0.35;
       hemiLight.intensity = 0.25;
-      scene.backgroundIntensity = 0.18;
-      scene.environmentIntensity = 0.30;
+      scene3D.backgroundIntensity = 0.18;
+      scene3D.environmentIntensity = 0.30;
       duskLightsGroup.visible = true;
     });
 
+    // =========================================================================
+    // 3. 360° Equirectangular Tour Engine, 3D Hotspot Portals & 2D Floor Minimap
+    // =========================================================================
+    const panoListEl = document.getElementById('pano-list-el');
+    const hotspotLayer = document.getElementById('hotspot-layer');
+    const minimapCanvas = document.getElementById('pano-minimap');
+    const ctxMap = minimapCanvas.getContext('2d');
+    let activeMapFilter = 'all';
+
+    // Populate categorized list of 16 panoramas
+    let lastCat = '';
+    PANORAMAS.forEach((p) => {
+      if (p.category !== lastCat) {
+        lastCat = p.category;
+        const head = document.createElement('div');
+        head.className = 'pano-cat-head';
+        head.textContent = p.category;
+        panoListEl.appendChild(head);
+      }
+      const item = document.createElement('div');
+      item.className = 'pano-item';
+      item.dataset.panoid = p.id;
+      item.innerHTML = `
+        <span>${p.title}</span>
+        <span class="pano-badge">${p.level}</span>
+      `;
+      item.addEventListener('click', () => loadPanorama(p.id));
+      panoListEl.appendChild(item);
+    });
+
+    function loadPanoramaTexture(panoId, onReady) {
+      if (panoTextureCache.has(panoId)) {
+        onReady(panoTextureCache.get(panoId));
+        return;
+      }
+      const candidates = [
+        `./panoramas/${panoId}.png`,
+        `../outputs/panoramas/${panoId}.png`,
+        `../outputs/bonus_type_a_panorama_360.png`
+      ];
+      function tryIdx(i) {
+        if (i >= candidates.length) return;
+        texLoader.load(
+          candidates[i],
+          (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            panoTextureCache.set(panoId, tex);
+            onReady(tex);
+          },
+          undefined,
+          () => tryIdx(i + 1)
+        );
+      }
+      tryIdx(0);
+    }
+
+    function loadPanorama(panoId) {
+      const target = PANORAMAS.find((p) => p.id === panoId) || PANORAMAS[0];
+      currentPano = target;
+
+      document.querySelectorAll('.pano-item').forEach((el) => {
+        el.classList.toggle('active', el.dataset.panoid === target.id);
+      });
+      document.getElementById('pano-info-title').textContent = target.title;
+      document.getElementById('pano-info-desc').textContent = target.desc;
+
+      const bannerEl = document.getElementById('selection-banner');
+      bannerEl.classList.add('visible');
+      document.getElementById('banner-dot').style.background = '#38bdf8';
+      document.getElementById('banner-text').textContent = `360° View · ${target.title} (${target.level})`;
+
+      loadPanoramaTexture(target.id, (tex) => {
+        sphereMat.map = tex;
+        sphereMat.needsUpdate = true;
+      });
+
+      rebuildHotspotPins();
+      drawMinimap();
+    }
+
+    // Create 3D Hotspot Portals inside the 360° sphere to walk from room to room
+    const activeHotspotEls = [];
+    function rebuildHotspotPins() {
+      hotspotLayer.innerHTML = '';
+      activeHotspotEls.length = 0;
+      if (activeMode !== '360' || !currentPano) return;
+
+      (currentPano.links || []).forEach((targetId, idx) => {
+        const dest = PANORAMAS.find((p) => p.id === targetId);
+        if (!dest) return;
+
+        // Compute bearing angle in plan from currentPano.xy to dest.xy
+        const dx = dest.xy[0] - currentPano.xy[0];
+        const dy = dest.xy[1] - currentPano.xy[1];
+        let angleRad = Math.atan2(dy, dx);
+        if (Math.hypot(dx, dy) < 0.5) {
+          angleRad = (idx * Math.PI * 0.5);
+        }
+
+        // 3D position on the interior of the sphere (slightly below horizon at pitch = -10 deg)
+        const r = 42;
+        const pitchRad = THREE.MathUtils.degToRad(-9);
+        const worldPos = new THREE.Vector3(
+          r * Math.cos(pitchRad) * Math.cos(angleRad),
+          r * Math.sin(pitchRad),
+          -r * Math.cos(pitchRad) * Math.sin(angleRad)
+        );
+
+        const pin = document.createElement('div');
+        pin.className = 'hotspot-pin';
+        pin.innerHTML = `
+          <span class="hotspot-icon">↑</span>
+          <span>Walk to ${dest.short}</span>
+        `;
+        pin.addEventListener('click', (e) => {
+          e.stopPropagation();
+          loadPanorama(dest.id);
+        });
+        hotspotLayer.appendChild(pin);
+        activeHotspotEls.push({ el: pin, worldPos });
+      });
+    }
+
+    function updateHotspotScreenPositions() {
+      if (activeMode !== '360') return;
+      const halfW = window.innerWidth * 0.5;
+      const halfH = window.innerHeight * 0.5;
+      const camDir = new THREE.Vector3();
+      cameraPano.getWorldDirection(camDir);
+
+      activeHotspotEls.forEach((item) => {
+        const toPin = item.worldPos.clone().normalize();
+        const dot = camDir.dot(toPin);
+        if (dot <= 0.15) {
+          item.el.style.display = 'none';
+          return;
+        }
+        const projected = item.worldPos.clone().project(cameraPano);
+        const sx = (projected.x * halfW) + halfW;
+        const sy = -(projected.y * halfH) + halfH;
+        item.el.style.display = 'flex';
+        item.el.style.left = `${sx}px`;
+        item.el.style.top = `${sy}px`;
+      });
+    }
+
+    // Interactive 2D Floor & Site Minimap Canvas
+    function planToCanvas(x, y) {
+      // Plan X in [-4.5, 15.0], Plan Y in [-5.0, 42.0]
+      const cx = 36 + ((x + 4.5) / 19.5) * 145;
+      const cy = 210 - ((y + 5.0) / 47.0) * 195;
+      return [cx, cy];
+    }
+
+    function drawMinimap() {
+      const w = minimapCanvas.width;
+      const h = minimapCanvas.height;
+      ctxMap.clearRect(0, 0, w, h);
+
+      // Background
+      ctxMap.fillStyle = '#0d1216';
+      ctxMap.fillRect(0, 0, w, h);
+
+      // Draw Plot Boundary
+      const [px0, py0] = planToCanvas(-3.8, -4.0);
+      const [px1, py1] = planToCanvas(14.3, 41.0);
+      ctxMap.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctxMap.lineWidth = 1;
+      ctxMap.strokeRect(px0, py1, px1 - px0, py0 - py1);
+
+      // Draw Type A (Front Wing: Y in [0, 19.1])
+      const [ax0, ay0] = planToCanvas(0.0, 0.0);
+      const [ax1, ay1] = planToCanvas(13.12, 19.1);
+      ctxMap.fillStyle = 'rgba(217, 119, 54, 0.16)';
+      ctxMap.strokeStyle = 'rgba(217, 119, 54, 0.65)';
+      ctxMap.lineWidth = 1.5;
+      ctxMap.fillRect(ax0, ay1, ax1 - ax0, ay0 - ay1);
+      ctxMap.strokeRect(ax0, ay1, ax1 - ax0, ay0 - ay1);
+
+      // Draw Core (Y in [19.1, 22.9])
+      const [cx0, cy0] = planToCanvas(1.6, 19.1);
+      const [cx1, cy1] = planToCanvas(11.3, 22.9);
+      ctxMap.fillStyle = 'rgba(56, 189, 248, 0.15)';
+      ctxMap.fillRect(cx0, cy1, cx1 - cx0, cy0 - cy1);
+
+      // Draw Type B (Rear Wing: Y in [22.9, 38.7])
+      const [bx0, by0] = planToCanvas(0.0, 22.9);
+      const [bx1, by1] = planToCanvas(13.12, 38.73);
+      ctxMap.fillStyle = 'rgba(104, 159, 117, 0.16)';
+      ctxMap.strokeStyle = 'rgba(104, 159, 117, 0.65)';
+      ctxMap.fillRect(bx0, by1, bx1 - bx0, by0 - by1);
+      ctxMap.strokeRect(bx0, by1, bx1 - bx0, by0 - by1);
+
+      // Labels on right legend area
+      ctxMap.fillStyle = '#9ca3af';
+      ctxMap.font = 'bold 10px sans-serif';
+      ctxMap.fillText('NORTH ↑', 205, 24);
+      ctxMap.fillStyle = '#ffad75';
+      ctxMap.fillText('■ Type A (Front)', 205, 52);
+      ctxMap.fillStyle = '#b5e0c0';
+      ctxMap.fillText('■ Type B (Rear)', 205, 70);
+      ctxMap.fillStyle = '#38bdf8';
+      ctxMap.fillText('● Amenities (6)', 205, 88);
+      ctxMap.fillStyle = '#d1d5db';
+      ctxMap.font = '10px sans-serif';
+      ctxMap.fillText('Active View:', 205, 118);
+      ctxMap.fillStyle = '#fff';
+      ctxMap.font = 'bold 10.5px sans-serif';
+      ctxMap.fillText(currentPano ? currentPano.short : '', 205, 134);
+      ctxMap.fillStyle = '#9ca3af';
+      ctxMap.font = '10px sans-serif';
+      ctxMap.fillText(currentPano ? currentPano.level : '', 205, 149);
+
+      // Draw active camera FOV radar cone
+      if (currentPano) {
+        const [acx, acy] = planToCanvas(currentPano.xy[0], currentPano.xy[1]);
+        const rad = THREE.MathUtils.degToRad(panoLon);
+        ctxMap.save();
+        ctxMap.beginPath();
+        ctxMap.moveTo(acx, acy);
+        ctxMap.arc(acx, acy, 24, -rad - 0.45, -rad + 0.45);
+        ctxMap.closePath();
+        ctxMap.fillStyle = 'rgba(255, 180, 80, 0.32)';
+        ctxMap.fill();
+        ctxMap.restore();
+      }
+
+      // Draw viewpoint pins
+      PANORAMAS.forEach((p) => {
+        if (activeMapFilter !== 'all' && p.group !== activeMapFilter) return;
+        const [mx, my] = planToCanvas(p.xy[0], p.xy[1]);
+        const isCurrent = currentPano && currentPano.id === p.id;
+        ctxMap.beginPath();
+        ctxMap.arc(mx, my, isCurrent ? 6.5 : 4.8, 0, Math.PI * 2);
+        if (isCurrent) {
+          ctxMap.fillStyle = '#ffffff';
+          ctxMap.strokeStyle = '#d97736';
+          ctxMap.lineWidth = 2.5;
+        } else {
+          ctxMap.fillStyle = p.group === 'bldg' ? '#38bdf8' : (p.group === 'typeA' ? '#f97316' : '#4ade80');
+          ctxMap.strokeStyle = '#0d1216';
+          ctxMap.lineWidth = 1.2;
+        }
+        ctxMap.fill();
+        ctxMap.stroke();
+
+        // Pin number
+        ctxMap.fillStyle = isCurrent ? '#d97736' : '#e5e7eb';
+        ctxMap.font = 'bold 8.5px sans-serif';
+        ctxMap.fillText(String(p.num), mx + 6, my + 3);
+      });
+    }
+
+    minimapCanvas.addEventListener('click', (e) => {
+      const rect = minimapCanvas.getBoundingClientRect();
+      const scaleX = minimapCanvas.width / rect.width;
+      const scaleY = minimapCanvas.height / rect.height;
+      const cx = (e.clientX - rect.left) * scaleX;
+      const cy = (e.clientY - rect.top) * scaleY;
+
+      let bestPano = null;
+      let bestDist = 18;
+      PANORAMAS.forEach((p) => {
+        if (activeMapFilter !== 'all' && p.group !== activeMapFilter) return;
+        const [mx, my] = planToCanvas(p.xy[0], p.xy[1]);
+        const d = Math.hypot(cx - mx, cy - my);
+        if (d < bestDist) {
+          bestDist = d;
+          bestPano = p;
+        }
+      });
+      if (bestPano) loadPanorama(bestPano.id);
+    });
+
+    document.querySelectorAll('.map-filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.map-filter-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeMapFilter = btn.dataset.mapgroup;
+        drawMinimap();
+      });
+    });
+
+    // =========================================================================
+    // 4. Stills Gallery Builder & Lightbox
+    // =========================================================================
+    const galleryContent = document.getElementById('gallery-content');
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+
+    GALLERY_SECTIONS.forEach((sec) => {
+      const secEl = document.createElement('div');
+      secEl.innerHTML = `<div class="gallery-section-title"><span>${sec.title}</span><span style="font-size:11px; color:var(--text-muted);">Click any card for 2560×1440 full screen</span></div>`;
+      const grid = document.createElement('div');
+      grid.className = 'gallery-grid';
+      sec.items.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+        const img = document.createElement('img');
+        img.src = item.paths[0];
+        img.onerror = () => { if (item.paths[1]) img.src = item.paths[1]; };
+        card.innerHTML = `
+          <div class="gallery-card-body">
+            <div class="gallery-card-title">${item.title}</div>
+            <div class="gallery-card-sub">${item.sub}</div>
+          </div>
+        `;
+        card.prepend(img);
+        card.addEventListener('click', () => {
+          lightboxImg.src = img.src;
+          lightboxCaption.textContent = `${item.title} — ${item.sub}`;
+          lightboxModal.classList.add('visible');
+        });
+        grid.appendChild(card);
+      });
+      secEl.appendChild(grid);
+      galleryContent.appendChild(secEl);
+    });
+
+    document.getElementById('btn-close-lightbox').addEventListener('click', () => {
+      lightboxModal.classList.remove('visible');
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') lightboxModal.classList.remove('visible');
+    });
+
+    // =========================================================================
+    // 5. Mode Switching (3D Building <-> 360° Virtual Tour <-> Stills Gallery)
+    // =========================================================================
+    const tab3D = document.getElementById('tab-3d');
+    const tab360 = document.getElementById('tab-360');
+    const tabGallery = document.getElementById('tab-gallery');
+    const panel3D = document.getElementById('panel-3d');
+    const panel360 = document.getElementById('panel-360');
+    const galleryOverlay = document.getElementById('gallery-overlay');
+    const footerHelp = document.getElementById('footer-help');
+
+    function setViewerMode(mode) {
+      activeMode = mode;
+      tab3D.classList.toggle('active', mode === '3d');
+      tab360.classList.toggle('active', mode === '360');
+      tabGallery.classList.toggle('active', mode === 'gallery');
+
+      panel3D.style.display = mode === '3d' ? 'flex' : 'none';
+      panel360.style.display = mode === '360' ? 'flex' : 'none';
+      galleryOverlay.classList.toggle('visible', mode === 'gallery');
+      controls3D.enabled = (mode === '3d');
+
+      if (mode === '360') {
+        footerHelp.textContent = 'Left-drag: Look around 360° · Scroll: FOV Zoom · Click 3D Hotspots or Minimap Pins: Walk between rooms';
+        loadPanorama(currentPano.id);
+      } else if (mode === '3d') {
+        hotspotLayer.innerHTML = '';
+        footerHelp.textContent = 'Left-drag: Orbit · Right-drag: Pan · Scroll: Zoom · Click Building or Badges: Focus Floor / Type A / Type B';
+        selectFloorAndUnit(selectedFloor, selectedUnit, false);
+      } else {
+        hotspotLayer.innerHTML = '';
+      }
+    }
+
+    tab3D.addEventListener('click', () => setViewerMode('3d'));
+    tab360.addEventListener('click', () => setViewerMode('360'));
+    tabGallery.addEventListener('click', () => setViewerMode('gallery'));
+
+    // =========================================================================
+    // 6. Pointer Interaction: 3D Raycasting & 360° Drag-to-Look
+    // =========================================================================
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let downPos = { x: 0, y: 0 };
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      downPos = { x: e.clientX, y: e.clientY };
+      if (activeMode === '360') {
+        isDraggingPano = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        dragStartLon = panoLon;
+        dragStartLat = panoLat;
+      }
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (activeMode === '360' && isDraggingPano) {
+        panoLon = (dragStartX - e.clientX) * 0.18 + dragStartLon;
+        panoLat = Math.max(-85, Math.min(85, (e.clientY - dragStartY) * 0.18 + dragStartLat));
+        drawMinimap();
+      }
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      isDraggingPano = false;
+      if (activeMode === '3d' && Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) <= 5) {
+        if (e.target !== renderer.domElement) return;
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera3D);
+        const visibleBuildingMeshes = allBuildingMeshes.filter((m) => m.visible);
+        const hits = raycaster.intersectObjects(visibleBuildingMeshes, false);
+        if (hits.length > 0 && hits[0].object.userData.floorIndex !== undefined) {
+          const hitFloor = hits[0].object.userData.floorIndex;
+          const hitPt = hits[0].point;
+          let hitUnit = hits[0].object.userData.unitType || null;
+          if (hitFloor >= 1 && hitFloor <= 7 && !hitUnit && selectedFloor === hitFloor) {
+            hitUnit = hitPt.z > -19.6 ? 'A' : 'B';
+          }
+          selectFloorAndUnit(hitFloor, hitUnit, true);
+        }
+      }
+    });
+
+    renderer.domElement.addEventListener('wheel', (e) => {
+      if (activeMode === '360') {
+        cameraPano.fov = THREE.MathUtils.clamp(cameraPano.fov + e.deltaY * 0.04, 35, 100);
+        cameraPano.updateProjectionMatrix();
+      }
+    });
+
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+      camera3D.aspect = window.innerWidth / window.innerHeight;
+      camera3D.updateProjectionMatrix();
+      cameraPano.aspect = window.innerWidth / window.innerHeight;
+      cameraPano.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // 9. Animation Loop + Smooth Camera Transitions + FPS Counter
+    // =========================================================================
+    // 7. Render Loop
+    // =========================================================================
     let frames = 0;
     let lastTime = performance.now();
     const fpsEl = document.getElementById('fps-counter');
@@ -828,17 +1641,28 @@
       requestAnimationFrame(animate);
       const now = performance.now();
 
-      if (camAnim) {
-        const t = Math.min(1, (now - camAnim.startTime) / camAnim.duration);
-        // Smooth cubic ease-out
-        const ease = 1 - Math.pow(1 - t, 3);
-        camera.position.lerpVectors(camAnim.startPos, camAnim.endPos, ease);
-        controls.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, ease);
-        if (t >= 1) camAnim = null;
+      if (activeMode === '3d') {
+        if (camAnim) {
+          const t = Math.min(1, (now - camAnim.startTime) / camAnim.duration);
+          const ease = 1 - Math.pow(1 - t, 3);
+          camera3D.position.lerpVectors(camAnim.startPos, camAnim.endPos, ease);
+          controls3D.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, ease);
+          if (t >= 1) camAnim = null;
+        }
+        controls3D.update();
+        renderer.render(scene3D, camera3D);
+      } else if (activeMode === '360') {
+        const phi = THREE.MathUtils.degToRad(90 - panoLat);
+        const theta = THREE.MathUtils.degToRad(panoLon);
+        const target = new THREE.Vector3(
+          50 * Math.sin(phi) * Math.cos(theta),
+          50 * Math.cos(phi),
+          50 * Math.sin(phi) * Math.sin(theta)
+        );
+        cameraPano.lookAt(target);
+        renderer.render(scenePano, cameraPano);
+        updateHotspotScreenPositions();
       }
-
-      controls.update();
-      renderer.render(scene, camera);
 
       frames++;
       if (now - lastTime >= 500) {

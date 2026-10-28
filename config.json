@@ -5,7 +5,7 @@
     "vibgyor-task/SUBMISSION - 04.dxf"
   ],
   "heights": {
-    "basement_depth": 4.65,
+    "basement_depth": 3.15,
     "stilt_floor_to_floor": 3.30,
     "typical_floor_to_floor": 3.05,
     "top_floor_to_terrace": 3.10,
@@ -81,7 +81,10 @@
     "trees": ["A_TREE"],
     "room_labels": ["A_TEXT"],
     "dw_labels": ["A_Text D&W"],
-    "rera_carpet": ["A_RERA CARPET", "A_RERA AREA"]
+    "rera_carpet": ["A_RERA CARPET", "A_RERA AREA"],
+    "parking_zones": ["A_PARKING"],
+    "car_bays": ["A_CAR"],
+    "scooter_bays": ["A_SCOOTER"]
   },
   "materials": {
     "concrete_facade": {

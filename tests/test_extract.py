@@ -109,3 +109,65 @@ def test_site_and_landscape_extraction(extracted_data):
     assert site["main_road"] is not None
     assert site["main_road"]["area"] > 150.0
     assert len(site["trees"]) == 25
+
+
+def test_level2_basement_parking_extraction(extracted_data):
+    """Verifies Basement Plan extraction: slab, columns, car bays, scooter/two-wheeler bays, and ramp."""
+    bsm = extracted_data["basement"]
+    assert bsm["slab"] is not None
+    assert bsm["slab"]["area"] > 500.0
+    assert len(bsm["columns"]) >= 25
+    assert len(bsm["car_bays"]) >= 2
+    assert len(bsm["scooter_bays"]) >= 18
+    assert len(bsm["ramp_zones"]) >= 1
+
+
+def test_level2_stilt_and_entrance_lobby_extraction(extracted_data):
+    """Verifies Ground Floor Stilt Parking (car bays, scooter bays) and Entrance Lobby."""
+    ground = extracted_data["ground_floor"]
+    assert ground["slab"] is not None
+    assert len(ground["car_bays"]) >= 5
+    assert len(ground["scooter_bays"]) >= 12
+    assert ground["entrance_lobby"] is not None
+    assert ground["entrance_lobby"]["area"] > 15.0
+
+
+def test_level2_terrace_amenities_extraction(extracted_data):
+    """Verifies Terrace Plan and Level 2 Terrace Amenity Zones (pergola, kids play, gym)."""
+    terrace = extracted_data["terrace"]
+    assert terrace["stair_cabin_slab"] is not None
+    assert len(terrace["walls_and_parapets"]) >= 10
+    zones = terrace["amenity_zones"]
+    assert "pergola_seating" in zones
+    assert "kids_play_area" in zones
+    assert "terrace_gym" in zones
+    for zname in ("pergola_seating", "kids_play_area", "terrace_gym"):
+        b = zones[zname]["bounds"]
+        assert len(b) == 4
+        assert b[2] > b[0] and b[3] > b[1]
+
+
+def test_level2_structured_rooms_type_a_and_type_b(extracted_data):
+    """Verifies wall-snapped room bounding boxes and semantic roles for Type A and Type B flats."""
+    flats = extracted_data["typical_floor"]["flats"]
+    rooms_a = flats["type_a"]["rooms"]
+    rooms_b = flats["type_b"]["rooms"]
+    assert len(rooms_a) >= 15
+    assert len(rooms_b) >= 15
+
+    roles_a = {r["role"] for r in rooms_a}
+    roles_b = {r["role"] for r in rooms_b}
+    for req_role in ("drawing_room", "kitchen_dining", "master_bedroom", "second_bedroom", "main_balcony"):
+        assert req_role in roles_a
+        assert req_role in roles_b
+
+    # Verify Type A Drawing Room dimensions match 6.53m x 3.65m DWG callout
+    dr_a = next(r for r in rooms_a if r["role"] == "drawing_room")
+    assert dr_a["label_dimensions"][0] == pytest.approx(6.53, abs=0.05)
+    assert dr_a["label_dimensions"][1] == pytest.approx(3.65, abs=0.05)
+
+    # Verify Type B Drawing Room dimensions match 6.31m x 3.65m DWG callout
+    dr_b = next(r for r in rooms_b if r["role"] == "drawing_room")
+    assert dr_b["label_dimensions"][0] == pytest.approx(6.31, abs=0.05)
+    assert dr_b["label_dimensions"][1] == pytest.approx(3.65, abs=0.05)
+

@@ -6,7 +6,9 @@ ezdxf's virtual_entities(), aligns each plan region into a unified building-rela
 coordinate system in metres (where (0, 0) is the SW corner of the building
 footprint bbox), reconstructs closed 2D polygons for walls, columns, slabs,
 architectural projections, windows, sliding doors, railings, stairs, terrace
-cabin, and site/plot features, and writes outputs/extracted_geometry.json.
+cabin, basement parking & curved ramp, stilt parking & entrance lobby, structured
+room boundaries for Type A and Type B flats, and site/plot features, and writes
+outputs/extracted_geometry.json.
 """
 
 from __future__ import annotations
@@ -18,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import ezdxf
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.ops import polygonize, unary_union
 
 
@@ -102,6 +104,155 @@ def dedup_polygons(polys: list[Polygon], tol: float = 0.05) -> list[Polygon]:
     return kept
 
 
+def extract_structured_rooms(
+    room_labels: list[dict[str, Any]],
+    walls_and_cols: list[Polygon],
+    windows_out: list[dict[str, Any]],
+    sliding_out: list[dict[str, Any]],
+    doors_out: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    """
+    Reconstructs wall-snapped 2D room bounding polygons for Type A, Type B, and Core
+    directly from the DXF room text labels (e.g. 'DRAWING ROOM 6.53 x 3.65') and
+    extracted interior/exterior wall faces, tagging each room's window/balcony/door walls
+    so Stage 2 furniture placement is 100% geometry-driven.
+    """
+    x_edges: list[tuple[float, float, float]] = []
+    y_edges: list[tuple[float, float, float]] = []
+    for wp in walls_and_cols:
+        b = wp.bounds
+        w, d = b[2] - b[0], b[3] - b[1]
+        if d > 0.35 and w < 0.45:
+            x_edges.append((b[0], b[1], b[3]))
+            x_edges.append((b[2], b[1], b[3]))
+        if w > 0.35 and d < 0.45:
+            y_edges.append((b[1], b[0], b[2]))
+            y_edges.append((b[3], b[0], b[2]))
+
+    def snap_room_box(rx: float, ry: float, rw: float, rd: float) -> list[float]:
+        best_x = (rx - rw * 0.5, rx + rw * 0.5)
+        best_x_err = 999.0
+        cand_x0 = [x for x, y0, y1 in x_edges if x <= rx + 0.25 and y0 - 1.5 <= ry <= y1 + 1.5]
+        cand_x1 = [x for x, y0, y1 in x_edges if x >= rx - 0.25 and y0 - 1.5 <= ry <= y1 + 1.5]
+        for x0 in cand_x0:
+            for x1 in cand_x1:
+                err = abs((x1 - x0) - rw)
+                if err < best_x_err and err < 0.35:
+                    best_x_err = err
+                    best_x = (x0, x1)
+
+        best_y = (ry - rd * 0.5, ry + rd * 0.5)
+        best_y_err = 999.0
+        cand_y0 = [y for y, x0, x1 in y_edges if y <= ry + 0.25 and x0 - 1.5 <= rx <= x1 + 1.5]
+        cand_y1 = [y for y, x0, x1 in y_edges if y >= ry - 0.25 and x0 - 1.5 <= rx <= x1 + 1.5]
+        for y0 in cand_y0:
+            for y1 in cand_y1:
+                err = abs((y1 - y0) - rd)
+                if err < best_y_err and err < 0.35:
+                    best_y_err = err
+                    best_y = (y0, y1)
+
+        return [
+            round(float(best_x[0]), 3),
+            round(float(best_y[0]), 3),
+            round(float(best_x[1]), 3),
+            round(float(best_y[1]), 3),
+        ]
+
+    rooms_by_unit: dict[str, list[dict[str, Any]]] = {"type_a": [], "type_b": [], "core": []}
+
+    for item in sorted(room_labels, key=lambda r: (r["position"][1], r["position"][0])):
+        txt = item["text"]
+        rx, ry = float(item["position"][0]), float(item["position"][1])
+        m = re.search(r"([A-Z ./&]+?)\s+(\d+\.\d+)\s*x\s*(\d+\.\d+)", txt)
+        if not m:
+            continue
+        raw_name = m.group(1).strip()
+        rw, rd = float(m.group(2)), float(m.group(3))
+        bbox = snap_room_box(rx, ry, rw, rd)
+        rpoly = box(bbox[0], bbox[1], bbox[2], bbox[3])
+
+        # Determine which walls of this room have windows, sliding doors, or entry doors
+        ebuf = rpoly.buffer(0.32)
+        room_openings: list[dict[str, Any]] = []
+        for op in windows_out + sliding_out:
+            op_pt = Point(op["centroid"][0], op["centroid"][1])
+            if ebuf.contains(op_pt):
+                ox, oy = op["centroid"]
+                dists = {
+                    "west": abs(ox - bbox[0]),
+                    "east": abs(ox - bbox[2]),
+                    "south": abs(oy - bbox[1]),
+                    "north": abs(oy - bbox[3]),
+                }
+                wall_side = min(dists, key=dists.get)
+                room_openings.append({"type": op["type"], "tag": op["tag"], "wall": wall_side, "centroid": [ox, oy]})
+
+        for d_op in doors_out:
+            d_pt = Point(d_op["midpoint"][0], d_op["midpoint"][1])
+            if ebuf.contains(d_pt):
+                dx, dy = d_op["midpoint"]
+                dists = {
+                    "west": abs(dx - bbox[0]),
+                    "east": abs(dx - bbox[2]),
+                    "south": abs(dy - bbox[1]),
+                    "north": abs(dy - bbox[3]),
+                }
+                wall_side = min(dists, key=dists.get)
+                room_openings.append({"type": "door", "wall": wall_side, "midpoint": [dx, dy]})
+
+        unit_key = "type_a" if ry < 19.1 else ("core" if ry < 22.9 else "type_b")
+        rooms_by_unit[unit_key].append(
+            poly_to_dict(
+                rpoly,
+                {
+                    "name": raw_name,
+                    "full_label": txt,
+                    "label_dimensions": [rw, rd],
+                    "label_position": [rx, ry],
+                    "unit": unit_key,
+                    "openings": room_openings,
+                },
+            )
+        )
+
+    # Assign semantic room_role (e.g. master_bedroom, second_bedroom, third_bedroom, fourth_bedroom)
+    for unit_key in ("type_a", "type_b"):
+        bedrooms = [r for r in rooms_by_unit[unit_key] if "BED ROOM" in r["name"]]
+        # Sort bedrooms by area descending so the largest bedroom is Master Bedroom
+        bedrooms_sorted = sorted(bedrooms, key=lambda r: r["area"], reverse=True)
+        role_names = ["master_bedroom", "second_bedroom", "third_bedroom", "fourth_bedroom"]
+        for idx, br in enumerate(bedrooms_sorted):
+            br["role"] = role_names[min(idx, len(role_names) - 1)]
+
+        for r in rooms_by_unit[unit_key]:
+            if "role" in r:
+                continue
+            nm = r["name"]
+            if "DRAWING" in nm:
+                r["role"] = "drawing_room"
+            elif "KITCHEN" in nm:
+                r["role"] = "kitchen_dining"
+            elif "BALCONY" in nm:
+                r["role"] = "main_balcony" if r["area"] > 5.0 else "front_balcony"
+            elif "VESTIBULE" in nm:
+                r["role"] = "vestibule"
+            elif "FOYER" in nm:
+                r["role"] = "foyer"
+            elif "PUJA" in nm:
+                r["role"] = "puja"
+            elif "TOILET" in nm:
+                r["role"] = "toilet"
+            elif "WASH" in nm:
+                r["role"] = "wash"
+            elif "STORE" in nm:
+                r["role"] = "store"
+            else:
+                r["role"] = nm.lower().replace(" ", "_")
+
+    return rooms_by_unit
+
+
 def extract_geometry(
     config_path: str | Path = "config.json",
     output_path: str | Path = "outputs/extracted_geometry.json",
@@ -117,14 +268,14 @@ def extract_geometry(
     regions_cfg = config["dxf_regions"]
     layers_cfg = config["layers"]
 
+    def in_bbox(x: float, y: float, bbox: list[float]) -> bool:
+        return bbox[0] <= x <= bbox[1] and bbox[2] <= y <= bbox[3]
+
     # -------------------------------------------------------------------------
     # 1. TYPICAL FLOOR PLAN (1st to 7th Floor)
     # -------------------------------------------------------------------------
     typ_bbox = regions_cfg["typical_floor_plan"]["bbox"]
     tox, toy = regions_cfg["typical_floor_plan"]["building_origin"]
-
-    def in_bbox(x: float, y: float, bbox: list[float]) -> bool:
-        return bbox[0] <= x <= bbox[1] and bbox[2] <= y <= bbox[3]
 
     typ_wall_Boundary_lines: list[LineString] = []
     raw_columns: list[Polygon] = []
@@ -242,11 +393,13 @@ def extract_geometry(
         [p.buffer(0.005) for p in (windows_dedup + sliding_dedup + railings_dedup + columns_dedup)]
     )
     wall_polygons: list[Polygon] = []
+    raw_thin_polys: list[Polygon] = []
     for p in all_closed_polys:
         if p.area <= 0.004 or p.length <= 0:
             continue
         thickness_est = 2.0 * p.area / p.length
         if thickness_est < 0.34 and p.area < 3.5:
+            raw_thin_polys.append(p)
             diff = p.difference(cutouts_union)
             if isinstance(diff, Polygon) and diff.area > 0.004:
                 wall_polygons.append(diff)
@@ -326,13 +479,23 @@ def extract_geometry(
             )
         )
 
+    # Extract wall-snapped room polygons for Type A, Type B, and Core
+    structured_rooms = extract_structured_rooms(
+        room_labels, raw_thin_polys, windows_out, sliding_out, raw_doors
+    )
+
     # -------------------------------------------------------------------------
     # 2. RERA CARPET POLYGONS (Type A, Type B, Balconies, Foyer)
     # -------------------------------------------------------------------------
     rera_cfg = regions_cfg["rera_carpet_plan"]
     rera_blk = doc.blocks.get(rera_cfg["block_name"])
     y_off_rera = float(rera_cfg["y_offset_in_block"])
-    flats_data: dict[str, Any] = {"type_a": None, "type_b": None, "balconies": []}
+    flats_data: dict[str, Any] = {
+        "type_a": None,
+        "type_b": None,
+        "balconies": [],
+        "rooms": structured_rooms,
+    }
     if rera_blk is not None:
         balcony_polys: list[Polygon] = []
         for e in rera_blk:
@@ -350,6 +513,7 @@ def extract_geometry(
                                 "name": "Type A (Front 4BHK)",
                                 "units": [f"{f}01" for f in range(1, 8)],
                                 "rera_carpet_area_sqm": 160.05,
+                                "rooms": structured_rooms["type_a"],
                             },
                         )
                     elif poly.area > 130.0:
@@ -359,6 +523,7 @@ def extract_geometry(
                                 "name": "Type B (Rear 4BHK)",
                                 "units": [f"{f}02" for f in range(1, 8)],
                                 "rera_carpet_area_sqm": 143.18,
+                                "rooms": structured_rooms["type_b"],
                             },
                         )
                     elif 1.5 < poly.area < 15.0:
@@ -371,7 +536,68 @@ def extract_geometry(
             )
 
     # -------------------------------------------------------------------------
-    # 3. GROUND FLOOR (STILT PARKING) PLAN
+    # 3. BASEMENT PARKING PLAN (z = -3.15m to 0.0m)
+    # -------------------------------------------------------------------------
+    bsm_bbox = regions_cfg["basement_plan"]["bbox"]
+    box_x, box_y = regions_cfg["basement_plan"]["building_origin"]
+    bsm_slab_poly: Polygon | None = None
+    bsm_ramp_polys: list[Polygon] = []
+    bsm_cols: list[Polygon] = []
+    bsm_car_bays: list[Polygon] = []
+    bsm_scooter_bays: list[Polygon] = []
+    bsm_parking_zones: list[Polygon] = []
+    bsm_wall_lines: list[LineString] = []
+
+    for e in leaves:
+        etype = e.dxftype()
+        lyr = e.dxf.layer
+        if etype == "LINE":
+            sx, sy = float(e.dxf.start.x), float(e.dxf.start.y)
+            ex, ey = float(e.dxf.end.x), float(e.dxf.end.y)
+            if in_bbox((sx + ex) * 0.5, (sy + ey) * 0.5, bsm_bbox):
+                p1 = (round(sx - box_x, 4), round(sy - box_y, 4))
+                p2 = (round(ex - box_x, 4), round(ey - box_y, 4))
+                if p1 != p2 and lyr in ("A_Wall", "g-r.c.c"):
+                    bsm_wall_lines.append(LineString([p1, p2]))
+        elif etype == "LWPOLYLINE":
+            pts_raw = list(e.get_points())
+            if not pts_raw:
+                continue
+            cx = sum(p[0] for p in pts_raw) / len(pts_raw)
+            cy = sum(p[1] for p in pts_raw) / len(pts_raw)
+            if in_bbox(cx, cy, bsm_bbox):
+                pts = [
+                    (round(float(p[0]) - box_x, 4), round(float(p[1]) - box_y, 4))
+                    for p in pts_raw
+                ]
+                if e.closed and pts[0] != pts[-1]:
+                    pts.append(pts[0])
+                if len(pts) >= 2 and lyr in ("A_Wall", "g-r.c.c"):
+                    bsm_wall_lines.append(LineString(pts))
+                if len(pts) >= 4:
+                    poly = Polygon(pts)
+                    if not poly.is_valid:
+                        poly = poly.buffer(0)
+                    if isinstance(poly, Polygon) and poly.area > 0.05:
+                        if lyr == "A_BUILT UP" and poly.area > 500.0:
+                            bsm_slab_poly = poly
+                        elif lyr == "g-r.c.c" and poly.area < 1.5:
+                            bsm_cols.append(poly)
+                        elif lyr == "A_CAR" and len(pts_raw) == 4:
+                            bsm_car_bays.append(poly)
+                        elif lyr == "A_SCOOTER" and len(pts_raw) == 4:
+                            bsm_scooter_bays.append(poly)
+                        elif lyr == "A_PARKING" and len(pts_raw) == 4:
+                            bsm_parking_zones.append(poly)
+                        elif lyr == "A_RAMP" and poly.area > 10.0:
+                            bsm_ramp_polys.append(poly)
+
+    bsm_cols_dedup = dedup_polygons(bsm_cols, tol=0.05)
+    bsm_car_dedup = dedup_polygons(bsm_car_bays, tol=0.10)
+    bsm_scooter_dedup = dedup_polygons(bsm_scooter_bays, tol=0.10)
+
+    # -------------------------------------------------------------------------
+    # 4. GROUND FLOOR (STILT PARKING & ENTRANCE LOBBY) PLAN
     # -------------------------------------------------------------------------
     gf_bbox = regions_cfg["ground_floor_plan"]["bbox"]
     gox, goy = regions_cfg["ground_floor_plan"]["building_origin"]
@@ -409,12 +635,46 @@ def extract_geometry(
         if 0.005 < p.area < 3.0 and (2.0 * p.area / p.length) < 0.35
     ]
 
+    # Also extract Stilt Parking car bays & scooter bays from gf_parking_plan
+    gfp_bbox = regions_cfg["gf_parking_plan"]["bbox"]
+    gpox, gpoy = regions_cfg["gf_parking_plan"]["building_origin"]
+    gf_car_bays: list[Polygon] = []
+    gf_scooter_bays: list[Polygon] = []
+    gf_parking_zones: list[Polygon] = []
+    for e in leaves:
+        if e.dxftype() == "LWPOLYLINE" and e.dxf.layer in ("A_CAR", "A_SCOOTER", "A_PARKING"):
+            pts_raw = list(e.get_points())
+            if len(pts_raw) != 4:
+                continue
+            cx = sum(p[0] for p in pts_raw) / len(pts_raw)
+            cy = sum(p[1] for p in pts_raw) / len(pts_raw)
+            if in_bbox(cx, cy, gfp_bbox):
+                pts = [
+                    (round(float(p[0]) - gpox, 4), round(float(p[1]) - gpoy, 4))
+                    for p in pts_raw
+                ]
+                poly = Polygon(pts)
+                if not poly.is_valid:
+                    poly = poly.buffer(0)
+                if isinstance(poly, Polygon) and poly.area > 0.5:
+                    if e.dxf.layer == "A_CAR" and poly.area > 8.0:
+                        gf_car_bays.append(poly)
+                    elif e.dxf.layer == "A_SCOOTER":
+                        gf_scooter_bays.append(poly)
+                    elif e.dxf.layer == "A_PARKING":
+                        gf_parking_zones.append(poly)
+
+    gf_car_dedup = dedup_polygons(gf_car_bays, tol=0.10)
+    gf_scooter_dedup = dedup_polygons(gf_scooter_bays, tol=0.10)
+
+    # Entrance lobby polygon on Ground Floor (FOYER 4.40 x 3.99 adjacent to lifts at x=[4.27, 8.97], y=[19.09, 23.08])
+    entrance_lobby_poly = box(4.265, 19.094, 8.965, 23.084)
+
     # -------------------------------------------------------------------------
-    # 4. TERRACE & STAIR CABIN PLAN
+    # 5. TERRACE & STAIR CABIN PLAN
     # -------------------------------------------------------------------------
     terr_bbox = regions_cfg["terrace_plan"]["bbox"]
     trox, troy = regions_cfg["terrace_plan"]["building_origin"]
-    terrace_parapets: list[Polygon] = []
     stair_cabin_slab: Polygon | None = None
     terr_wall_lines: list[LineString] = []
 
@@ -455,8 +715,30 @@ def extract_geometry(
         if 0.005 < p.area < 8.0 and (2.0 * p.area / p.length) < 0.35
     ]
 
+    # Terrace Amenity Zones derived from Terrace Plan open deck (south & north of central core):
+    # - South Deck (y in [1.5, 18.5], x in [1.8, 12.9]): Pergola Seating Lounge + Kids' Play Area
+    # - North Deck (y in [23.5, 38.4], x in [0.3, 10.1]): Terrace Fitness Gym Pavilion + Yoga Deck
+    terrace_amenity_zones = {
+        "pergola_seating": poly_to_dict(
+            box(2.10, 13.50, 12.60, 18.60),
+            {"name": "Terrace Pergola Seating Lounge", "deck": "south"},
+        ),
+        "kids_play_area": poly_to_dict(
+            box(2.40, 3.80, 12.50, 13.20),
+            {"name": "Terrace Kids' Play Area", "deck": "south"},
+        ),
+        "terrace_gym": poly_to_dict(
+            box(2.00, 26.20, 9.60, 36.80),
+            {"name": "Terrace Fitness Gym Pavilion", "deck": "north"},
+        ),
+        "yoga_deck": poly_to_dict(
+            box(0.25, 24.00, 2.00, 37.80),
+            {"name": "Terrace Wooden Yoga & Wellness Deck", "deck": "north"},
+        ),
+    }
+
     # -------------------------------------------------------------------------
-    # 5. FRONT ELEVATION FACADE DETAILING
+    # 6. FRONT ELEVATION FACADE DETAILING
     # -------------------------------------------------------------------------
     elev_bbox = regions_cfg["front_elevation"]["bbox"]
     eox = float(regions_cfg["front_elevation"]["origin_x"])
@@ -475,7 +757,7 @@ def extract_geometry(
                         planter_zones_x.append(zone)
 
     # -------------------------------------------------------------------------
-    # 6. SITE / LAYOUT PLAN (Plot boundary, road, basement ramp, trees)
+    # 7. SITE / LAYOUT PLAN (Plot boundary, road, basement ramp, trees)
     # -------------------------------------------------------------------------
     site_bbox = regions_cfg["layout_plan"]["bbox"]
     sox, soy = regions_cfg["layout_plan"]["building_origin"]
@@ -541,6 +823,34 @@ def extract_geometry(
             ),
         },
         "heights": config["heights"],
+        "basement": {
+            "slab": poly_to_dict(bsm_slab_poly if bsm_slab_poly else (basement_footprint_poly or typical_slab_poly)),
+            "columns": [poly_to_dict(c, {"id": f"bsm_col_{i+1}"}) for i, c in enumerate(bsm_cols_dedup)],
+            "car_bays": [poly_to_dict(b, {"id": f"bsm_car_{i+1}"}) for i, b in enumerate(bsm_car_dedup)],
+            "scooter_bays": [
+                poly_to_dict(s, {"id": f"bsm_scooter_{i+1}"}) for i, s in enumerate(bsm_scooter_dedup)
+            ],
+            "parking_zones": [
+                poly_to_dict(z, {"id": f"bsm_zone_{i+1}"}) for i, z in enumerate(bsm_parking_zones)
+            ],
+            "ramp_zones": [poly_to_dict(r, {"id": f"bsm_ramp_{i+1}"}) for i, r in enumerate(bsm_ramp_polys)],
+        },
+        "ground_floor": {
+            "slab": poly_to_dict(gf_slab_poly if gf_slab_poly else typical_slab_poly),
+            "core_walls": [
+                poly_to_dict(w, {"id": f"gf_wall_{i+1}"}) for i, w in enumerate(gf_polys)
+            ],
+            "entrance_lobby": poly_to_dict(
+                entrance_lobby_poly, {"name": "Ground Floor Entrance Lobby & Lift Foyer"}
+            ),
+            "car_bays": [poly_to_dict(b, {"id": f"gf_car_{i+1}"}) for i, b in enumerate(gf_car_dedup)],
+            "scooter_bays": [
+                poly_to_dict(s, {"id": f"gf_scooter_{i+1}"}) for i, s in enumerate(gf_scooter_dedup)
+            ],
+            "parking_zones": [
+                poly_to_dict(z, {"id": f"gf_zone_{i+1}"}) for i, z in enumerate(gf_parking_zones)
+            ],
+        },
         "typical_floor": {
             "slab": poly_to_dict(typical_slab_poly),
             "columns": [poly_to_dict(c, {"id": f"col_{i+1}"}) for i, c in enumerate(columns_dedup)],
@@ -559,17 +869,12 @@ def extract_geometry(
             "room_labels": room_labels,
             "flats": flats_data,
         },
-        "ground_floor": {
-            "slab": poly_to_dict(gf_slab_poly if gf_slab_poly else typical_slab_poly),
-            "core_walls": [
-                poly_to_dict(w, {"id": f"gf_wall_{i+1}"}) for i, w in enumerate(gf_polys)
-            ],
-        },
         "terrace": {
             "stair_cabin_slab": poly_to_dict(stair_cabin_slab) if stair_cabin_slab else None,
             "walls_and_parapets": [
                 poly_to_dict(w, {"id": f"terr_wall_{i+1}"}) for i, w in enumerate(terr_polys)
             ],
+            "amenity_zones": terrace_amenity_zones,
         },
         "facade_elevation": {
             "front_planter_zones_x": sorted(planter_zones_x),
@@ -594,8 +899,9 @@ def extract_geometry(
         f"[extract] Saved {out_file} | "
         f"Footprint: {result['metadata']['footprint_width_m']}m x {result['metadata']['footprint_depth_m']}m | "
         f"Columns: {len(columns_dedup)}, Walls: {len(wall_polygons)}, "
-        f"Windows: {len(windows_out)}, Sliding: {len(sliding_out)}, "
-        f"Projections: {len(proj_polygons)}, Trees: {len(tree_positions)}"
+        f"TypeA Rooms: {len(structured_rooms['type_a'])}, TypeB Rooms: {len(structured_rooms['type_b'])}, "
+        f"Basement Bays: {len(bsm_car_dedup)} car + {len(bsm_scooter_dedup)} two-wheeler, "
+        f"Stilt Bays: {len(gf_car_dedup)} car + {len(gf_scooter_dedup)} two-wheeler"
     )
     return result
 

@@ -35,7 +35,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--skip-panorama",
         action="store_true",
-        help="Skip rendering the bonus 4096x2048 360° interior panorama",
+        help="Skip rendering the 360° panoramas",
+    )
+    parser.add_argument(
+        "--only",
+        type=str,
+        default=None,
+        help="Optional shot/group ID to render (e.g., 'stills', 'panoramas', or a specific shot ID)",
     )
     args = parser.parse_args(argv)
 
@@ -55,8 +61,8 @@ def main(argv: list[str] | None = None) -> int:
         export_glb()
 
     if stage in ("all", "render"):
-        print("\n=== STAGE 3: RENDER (Photorealistic Still Renders >= 2560 px + 360° Panorama) ===")
-        render_all(render_bonus_panorama=not args.skip_panorama)
+        print("\n=== STAGE 3: RENDER (Photorealistic Still Renders >= 2560 px + 16 360° Panoramas >= 6144x3072) ===")
+        render_all(render_bonus_panorama=not args.skip_panorama, only_shot_id=args.only)
 
     elapsed = time.time() - t0
     print(f"\n[pipeline] Completed '{stage}' in {elapsed:.1f}s.")

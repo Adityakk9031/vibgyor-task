@@ -947,6 +947,16 @@ def build_model(
     scene.unit_settings.scale_length = 1.0
 
     mats = create_all_materials()
+    from pipeline.furnish import (
+        ensure_level2_materials,
+        build_basement_parking_amenity,
+        build_stilt_parking_and_entrance_lobby,
+        build_flat_interiors_for_floor,
+        build_terrace_amenities,
+        build_landscape_and_drive_amenities,
+    )
+    ensure_level2_materials(mats)
+
     heights = geom["heights"]
     stilt_h = float(heights["stilt_floor_to_floor"])
     typ_h = float(heights["typical_floor_to_floor"])
@@ -970,6 +980,11 @@ def build_model(
     site_coll = get_or_create_collection("Vibgyor_Site")
 
     # -------------------------------------------------------------------------
+    # 0. BASEMENT PARKING (z = -3.15m to 0.0m)
+    # -------------------------------------------------------------------------
+    build_basement_parking_amenity(geom, mats, building_coll)
+
+    # -------------------------------------------------------------------------
     # 1. STILT / GROUND FLOOR (z = 0.0 to 3.30m)
     # -------------------------------------------------------------------------
     stilt_coll = get_or_create_collection("Floor_0_Stilt", building_coll)
@@ -979,8 +994,11 @@ def build_model(
         "flats": "Stilt Parking & Entrance Foyer",
     }
 
-    # Ground plinth slab + 1st floor soffit slab
-    plinth_tm = extrude_shapely_polys([gf_slab_poly], -0.10, 0.05)
+    # Ground plinth slab (cut out the North-East basement ramp entrance so the ramp is open!)
+    ramp_entry_cut = Polygon([(10.8, 25.5), (15.0, 25.5), (15.0, 42.0), (-3.5, 42.0), (-3.5, 38.8), (10.8, 38.8)])
+    gf_slab_clean = gf_slab_poly.difference(ramp_entry_cut)
+    gf_slab_list = [gf_slab_clean] if isinstance(gf_slab_clean, Polygon) else list(gf_slab_clean.geoms)
+    plinth_tm = extrude_shapely_polys(gf_slab_list, -0.10, 0.05)
     add_trimesh_to_blender(plinth_tm, "Floor_0_Plinth_Slab", stilt_coll, mats["paver_driveway"], stilt_props)
 
     stilt_cols_tm = extrude_shapely_polys(col_polys, 0.0, stilt_h - slab_t)
@@ -989,9 +1007,8 @@ def build_model(
     stilt_core_tm = extrude_shapely_polys(gf_wall_polys, 0.0, stilt_h - slab_t)
     add_trimesh_to_blender(stilt_core_tm, "Floor_0_Core_Walls", stilt_coll, mats["wall_stucco"], stilt_props)
 
-    # Entrance foyer decorative wooden cladding & warm ceiling lights on Ground Floor
-    foyer_wood = make_box_trimesh(4.00, 18.80, 0.05, 8.80, 23.10, 0.08)
-    add_trimesh_to_blender(foyer_wood, "Floor_0_Foyer_Deck", stilt_coll, mats["wood_soffit"], stilt_props)
+    # Populate Stilt Parking bays, parked cars, and the Entrance Lobby (lifts, travertine, fluted wood, seating)
+    build_stilt_parking_and_entrance_lobby(geom, mats, stilt_coll)
 
     # -------------------------------------------------------------------------
     # 2. RESIDENTIAL FLOORS 1 TO 7
@@ -1160,10 +1177,9 @@ def build_model(
                 {**f_props, "unit_type": "Type B", "unit_no": f"{floor_num}02"},
             )
 
-        # Populate full interior furniture on Floor 1 Type A for the 360° Drawing Room Panorama Bonus
+        # Populate complete geometry-driven interiors for both Type A and Type B on Floor 1
         if floor_num == 1:
-            int_coll = get_or_create_collection("Floor_1_TypeA_Interior", f_coll)
-            build_type_a_drawing_room_interior(z_floor, f_h, slab_t, mats, int_coll)
+            build_flat_interiors_for_floor(geom, floor_num, z_floor, f_h, slab_t, mats, f_coll)
 
     # -------------------------------------------------------------------------
     # 3. TERRACE LEVEL, PARAPET, STAIR CABIN & OVERHEAD WATER TANK (z = 24.70m+)
@@ -1219,10 +1235,14 @@ def build_model(
             ohwt_box, "Floor_8_Overhead_Water_Tank", terr_coll, mats["concrete_facade"], terr_props
         )
 
+    # Populate Terrace Amenities (Pergola Seating, Kids' Play Area, Fitness Gym & Solar Roof)
+    build_terrace_amenities(geom, z_terrace, mats, terr_coll)
+
     # -------------------------------------------------------------------------
     # 4. SITE & LANDSCAPE
     # -------------------------------------------------------------------------
     build_site_and_plot(geom, mats, site_coll)
+    build_landscape_and_drive_amenities(geom, mats, site_coll)
 
     # Save .blend file
     out_blend = base_dir / output_blend_path
