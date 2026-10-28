@@ -18,7 +18,10 @@ from shapely.geometry import Polygon
 
 from pipeline.build_model import (
     add_trimesh_to_blender,
+    create_herringbone_wood_material,
     create_pbr_material,
+    create_statuario_marble_material,
+    create_walnut_cabinet_material,
     extrude_shapely_polys,
     make_box_trimesh,
     make_oriented_box,
@@ -28,14 +31,18 @@ from pipeline.build_model import (
 def ensure_level2_materials(mats: dict[str, bpy.types.Material]) -> dict[str, bpy.types.Material]:
     """Adds interior & amenity PBR materials to the material library."""
     extra = {
-        "oak_floor": create_pbr_material(
-            "Mat_Oak_Floor", base_color=(0.56, 0.38, 0.22), roughness=0.35, bump_scale=24.0, bump_strength=0.08
-        ),
-        "fluted_wood": create_pbr_material(
-            "Mat_Fluted_Wood", base_color=(0.48, 0.30, 0.16), roughness=0.42, bump_scale=40.0, bump_strength=0.14
-        ),
+        "oak_floor": create_herringbone_wood_material("Mat_Oak_Floor"),
+        "fluted_wood": create_walnut_cabinet_material("Mat_Fluted_Wood"),
+        "walnut_wood": create_walnut_cabinet_material("Mat_Walnut_Cabinet"),
+        "statuario_marble": create_statuario_marble_material("Mat_Statuario_Marble"),
         "travertine_marble": create_pbr_material(
             "Mat_Travertine_Marble", base_color=(0.84, 0.78, 0.68), roughness=0.18, bump_scale=10.0, bump_strength=0.05
+        ),
+        "black_steel": create_pbr_material(
+            "Mat_Black_Steel", base_color=(0.04, 0.04, 0.04), roughness=0.22, metallic=0.92
+        ),
+        "matte_black_dome": create_pbr_material(
+            "Mat_Matte_Black_Dome", base_color=(0.02, 0.02, 0.02), roughness=0.35, metallic=0.40
         ),
         "bronze_metal": create_pbr_material(
             "Mat_Bronze_Metal", base_color=(0.45, 0.33, 0.22), roughness=0.26, metallic=0.88
@@ -61,12 +68,8 @@ def ensure_level2_materials(mats: dict[str, bpy.types.Material]) -> dict[str, bp
         "sheer_curtain": create_pbr_material(
             "Mat_Sheer_Curtain", base_color=(0.95, 0.94, 0.91), roughness=0.75, transmission=0.45, alpha=0.65
         ),
-        "quartz_counter": create_pbr_material(
-            "Mat_Quartz_Counter", base_color=(0.93, 0.92, 0.90), roughness=0.12
-        ),
-        "cabinet_taupe": create_pbr_material(
-            "Mat_Cabinet_Taupe", base_color=(0.52, 0.47, 0.42), roughness=0.36
-        ),
+        "quartz_counter": create_statuario_marble_material("Mat_Quartz_Counter"),
+        "cabinet_taupe": create_walnut_cabinet_material("Mat_Cabinet_Taupe"),
         "coral_velvet": create_pbr_material(
             "Mat_Coral_Velvet", base_color=(0.78, 0.36, 0.28), roughness=0.76
         ),
@@ -487,38 +490,75 @@ def furnish_kitchen_dining(
 
         dx_center = (x0 + 0.25 + kx0 - 0.45) * 0.5
 
-    # 6-Seater Dining Table + Chairs centered at (dx_center, dy_center)
+    # 6-Seater Scandinavian Natural Oak Dining Table + Molded Chairs centered at (dx_center, dy_center)
     dy_center = (y0 + y1) * 0.5
-    tw, td = 1.75, 0.98
-    buckets["dark_glass_table"].append(
-        make_box_trimesh(dx_center - tw * 0.5, dy_center - td * 0.5, z_f + 0.73, dx_center + tw * 0.5, dy_center + td * 0.5, z_f + 0.78)
+    tw, td = 1.95, 0.95
+    # Natural thick timber table top (matching MyArchitectAI reference)
+    buckets["oak_floor"].append(
+        make_box_trimesh(dx_center - tw * 0.5, dy_center - td * 0.5, z_f + 0.72, dx_center + tw * 0.5, dy_center + td * 0.5, z_f + 0.77)
     )
-    buckets["fluted_wood"].append(
-        make_box_trimesh(dx_center - 0.55, dy_center - 0.22, z_f + 0.02, dx_center + 0.55, dy_center + 0.22, z_f + 0.73)
-    )
+    # Angled black steel table legs
+    for leg_x in (dx_center - tw * 0.42, dx_center + tw * 0.42):
+        for leg_y in (dy_center - td * 0.38, dy_center + td * 0.38):
+            leg = trimesh.creation.cylinder(radius=0.035, height=0.72, sections=12)
+            leg.apply_translation([leg_x, leg_y, z_f + 0.36])
+            buckets["black_steel"].append(leg)
 
-    # 6 Dining chairs (3 on North side, 3 on South side)
-    for cx_off in (-0.56, 0.0, 0.56):
+    # Ceramic vases + minimal floral styling on table
+    vase = trimesh.creation.cylinder(radius=0.08, height=0.22, sections=16)
+    vase.apply_translation([dx_center - 0.15, dy_center, z_f + 0.88])
+    buckets["travertine_marble"].append(vase)
+    vase2 = trimesh.creation.cylinder(radius=0.06, height=0.15, sections=14)
+    vase2.apply_translation([dx_center + 0.12, dy_center - 0.05, z_f + 0.84])
+    buckets["charcoal_metal"].append(vase2)
+
+    # 6 Molded Eames-style dining chairs (black shell with wooden dowel legs)
+    for cx_off in (-0.62, 0.0, 0.62):
         for side_sign in (-1.0, 1.0):
-            cy_pos = dy_center + side_sign * (td * 0.5 + 0.24)
-            back_y = cy_pos + side_sign * 0.18
-            buckets["sofa_fabric"].extend(
+            cy_pos = dy_center + side_sign * (td * 0.5 + 0.28)
+            back_y = cy_pos + side_sign * 0.20
+            # Curved matte black bucket seat
+            buckets["matte_black_dome"].extend(
                 [
-                    make_box_trimesh(dx_center + cx_off - 0.21, cy_pos - 0.20, z_f + 0.42, dx_center + cx_off + 0.21, cy_pos + 0.20, z_f + 0.48),
-                    make_box_trimesh(dx_center + cx_off - 0.20, back_y - 0.04, z_f + 0.48, dx_center + cx_off + 0.20, back_y + 0.04, z_f + 0.86),
+                    make_box_trimesh(dx_center + cx_off - 0.22, cy_pos - 0.20, z_f + 0.44, dx_center + cx_off + 0.22, cy_pos + 0.20, z_f + 0.49),
+                    make_box_trimesh(dx_center + cx_off - 0.21, back_y - 0.03, z_f + 0.49, dx_center + cx_off + 0.21, back_y + 0.03, z_f + 0.84),
                 ]
             )
-            buckets["charcoal_metal"].append(
-                make_box_trimesh(dx_center + cx_off - 0.16, cy_pos - 0.16, z_f, dx_center + cx_off + 0.16, cy_pos + 0.16, z_f + 0.42)
-            )
+            # Wooden Eiffel legs
+            for lx in (dx_center + cx_off - 0.14, dx_center + cx_off + 0.14):
+                for ly in (cy_pos - 0.14, cy_pos + 0.14):
+                    leg = trimesh.creation.cylinder(radius=0.016, height=0.44, sections=10)
+                    leg.apply_translation([lx, ly, z_f + 0.22])
+                    buckets["oak_floor"].append(leg)
 
-    # Suspended warm linear pendant light over dining table
-    buckets["brass_gold"].append(
-        make_box_trimesh(dx_center - 0.65, dy_center - 0.04, z_ceil - 0.75, dx_center + 0.65, dy_center + 0.04, z_ceil - 0.68)
-    )
-    buckets["warm_led"].append(
-        make_box_trimesh(dx_center - 0.62, dy_center - 0.03, z_ceil - 0.78, dx_center + 0.62, dy_center + 0.03, z_ceil - 0.75)
-    )
+    # Dual Oversized Matte Black Dome Pendant Lights (exact match to MyArchitectAI reference)
+    for dome_x in (dx_center - 0.45, dx_center + 0.45):
+        # Dome fixture (raised to z_ceil - 0.48 so it floats cleanly in upper thirds)
+        dome = trimesh.creation.cylinder(radius=0.28, height=0.20, sections=24)
+        dome.apply_translation([dome_x, dy_center, z_ceil - 0.48])
+        buckets["matte_black_dome"].append(dome)
+        # Inner warm ambient glow emitter
+        emitter = trimesh.creation.cylinder(radius=0.22, height=0.03, sections=16)
+        emitter.apply_translation([dome_x, dy_center, z_ceil - 0.58])
+        buckets["warm_led"].append(emitter)
+        # Slender suspension cable to ceiling
+        cable = trimesh.creation.cylinder(radius=0.008, height=0.48, sections=8)
+        cable.apply_translation([dome_x, dy_center, z_ceil - 0.24])
+        buckets["black_steel"].append(cable)
+
+    # Black Steel Grid Glass Partition Screen (Crittall style door/screen in reference)
+    screen_x = dx_center + tw * 0.5 + 0.65
+    if screen_x < x1 - 0.4:
+        # Vertical mullions
+        for mx in (screen_x, screen_x + 1.25):
+            mullion = make_box_trimesh(mx - 0.03, y0 + 0.1, z_f, mx + 0.03, y1 - 0.1, z_ceil - 0.05)
+            buckets["black_steel"].append(mullion)
+        # Horizontal bars & glass panes
+        for hz in (z_f + 0.7, z_f + 1.4, z_f + 2.1):
+            bar = make_box_trimesh(screen_x, y0 + 0.1, hz - 0.02, screen_x + 1.25, y1 - 0.1, hz + 0.02)
+            buckets["black_steel"].append(bar)
+        glass_pane = make_box_trimesh(screen_x, y0 + 0.1, z_f + 0.05, screen_x + 1.25, y1 - 0.1, z_ceil - 0.05)
+        buckets["sheer_curtain"].append(glass_pane)
 
 
 def furnish_bedroom(

@@ -210,6 +210,159 @@ def create_pbr_material(
     return mat
 
 
+def create_herringbone_wood_material(name: str = "Mat_Herringbone_Wood") -> bpy.types.Material:
+    """Photorealistic Herringbone Oak parquet floor with 2K Diffuse, Roughness, and Normal maps."""
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    bsdf = nodes.get("Principled BSDF") or nodes.new(type="ShaderNodeBsdfPrincipled")
+
+    tex_dir = Path(__file__).resolve().parent.parent / "assets" / "textures"
+    diff_file = tex_dir / "herringbone_diff.jpg"
+    rough_file = tex_dir / "herringbone_rough.jpg"
+    nor_file = tex_dir / "herringbone_nor.jpg"
+
+    coord = nodes.new(type="ShaderNodeTexCoord")
+    mapping = nodes.new(type="ShaderNodeMapping")
+    mapping.vector_type = "POINT"
+    mapping.inputs["Scale"].default_value = (1.8, 1.8, 1.8)
+    links.new(coord.outputs["Object"], mapping.inputs["Vector"])
+
+    if diff_file.exists():
+        tex_diff = nodes.new(type="ShaderNodeTexImage")
+        tex_diff.image = bpy.data.images.load(str(diff_file), check_existing=True)
+        links.new(mapping.outputs["Vector"], tex_diff.inputs["Vector"])
+        links.new(tex_diff.outputs["Color"], bsdf.inputs["Base Color"])
+    else:
+        bsdf.inputs["Base Color"].default_value = (0.58, 0.42, 0.28, 1.0)
+
+    if rough_file.exists():
+        tex_rough = nodes.new(type="ShaderNodeTexImage")
+        tex_rough.image = bpy.data.images.load(str(rough_file), check_existing=True)
+        tex_rough.image.colorspace_settings.name = "Non-Color"
+        links.new(mapping.outputs["Vector"], tex_rough.inputs["Vector"])
+        links.new(tex_rough.outputs["Color"], bsdf.inputs["Roughness"])
+    else:
+        bsdf.inputs["Roughness"].default_value = 0.28
+
+    if nor_file.exists():
+        tex_nor = nodes.new(type="ShaderNodeTexImage")
+        tex_nor.image = bpy.data.images.load(str(nor_file), check_existing=True)
+        tex_nor.image.colorspace_settings.name = "Non-Color"
+        norm_map = nodes.new(type="ShaderNodeNormalMap")
+        norm_map.inputs["Strength"].default_value = 0.85
+        links.new(mapping.outputs["Vector"], tex_nor.inputs["Vector"])
+        links.new(tex_nor.outputs["Color"], norm_map.inputs["Color"])
+        links.new(norm_map.outputs["Normal"], bsdf.inputs["Normal"])
+
+    return mat
+
+
+def create_walnut_cabinet_material(name: str = "Mat_Walnut_Cabinet") -> bpy.types.Material:
+    """Photorealistic Architectural American Walnut Wood with 2K Diffuse, Roughness, and Normal maps."""
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    bsdf = nodes.get("Principled BSDF") or nodes.new(type="ShaderNodeBsdfPrincipled")
+
+    tex_dir = Path(__file__).resolve().parent.parent / "assets" / "textures"
+    diff_file = tex_dir / "walnut_diff.jpg"
+    rough_file = tex_dir / "walnut_rough.jpg"
+    nor_file = tex_dir / "walnut_nor.jpg"
+
+    coord = nodes.new(type="ShaderNodeTexCoord")
+    mapping = nodes.new(type="ShaderNodeMapping")
+    mapping.vector_type = "POINT"
+    mapping.inputs["Scale"].default_value = (1.5, 1.5, 1.5)
+    links.new(coord.outputs["Object"], mapping.inputs["Vector"])
+
+    if diff_file.exists():
+        tex_diff = nodes.new(type="ShaderNodeTexImage")
+        tex_diff.image = bpy.data.images.load(str(diff_file), check_existing=True)
+        links.new(mapping.outputs["Vector"], tex_diff.inputs["Vector"])
+        links.new(tex_diff.outputs["Color"], bsdf.inputs["Base Color"])
+    else:
+        bsdf.inputs["Base Color"].default_value = (0.32, 0.20, 0.12, 1.0)
+
+    if rough_file.exists():
+        tex_rough = nodes.new(type="ShaderNodeTexImage")
+        tex_rough.image = bpy.data.images.load(str(rough_file), check_existing=True)
+        tex_rough.image.colorspace_settings.name = "Non-Color"
+        links.new(mapping.outputs["Vector"], tex_rough.inputs["Vector"])
+        links.new(tex_rough.outputs["Color"], bsdf.inputs["Roughness"])
+    else:
+        bsdf.inputs["Roughness"].default_value = 0.38
+
+    if nor_file.exists():
+        tex_nor = nodes.new(type="ShaderNodeTexImage")
+        tex_nor.image = bpy.data.images.load(str(nor_file), check_existing=True)
+        tex_nor.image.colorspace_settings.name = "Non-Color"
+        norm_map = nodes.new(type="ShaderNodeNormalMap")
+        norm_map.inputs["Strength"].default_value = 0.8
+        links.new(mapping.outputs["Vector"], tex_nor.inputs["Vector"])
+        links.new(tex_nor.outputs["Color"], norm_map.inputs["Color"])
+        links.new(norm_map.outputs["Normal"], bsdf.inputs["Normal"])
+
+    return mat
+
+
+def create_statuario_marble_material(name: str = "Mat_Statuario_Marble") -> bpy.types.Material:
+    """Photorealistic Polished Marble Waterfall Countertop with 2K Diffuse, Roughness, and Normal maps."""
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    bsdf = nodes.get("Principled BSDF") or nodes.new(type="ShaderNodeBsdfPrincipled")
+
+    tex_dir = Path(__file__).resolve().parent.parent / "assets" / "textures"
+    diff_file = tex_dir / "marble_diff.jpg"
+    rough_file = tex_dir / "marble_rough.jpg"
+    nor_file = tex_dir / "marble_nor.jpg"
+
+    coord = nodes.new(type="ShaderNodeTexCoord")
+    mapping = nodes.new(type="ShaderNodeMapping")
+    mapping.vector_type = "POINT"
+    mapping.inputs["Scale"].default_value = (1.2, 1.2, 1.2)
+    links.new(coord.outputs["Object"], mapping.inputs["Vector"])
+
+    if diff_file.exists():
+        tex_diff = nodes.new(type="ShaderNodeTexImage")
+        tex_diff.image = bpy.data.images.load(str(diff_file), check_existing=True)
+        links.new(mapping.outputs["Vector"], tex_diff.inputs["Vector"])
+        links.new(tex_diff.outputs["Color"], bsdf.inputs["Base Color"])
+    else:
+        bsdf.inputs["Base Color"].default_value = (0.94, 0.94, 0.95, 1.0)
+
+    if rough_file.exists():
+        tex_rough = nodes.new(type="ShaderNodeTexImage")
+        tex_rough.image = bpy.data.images.load(str(rough_file), check_existing=True)
+        tex_rough.image.colorspace_settings.name = "Non-Color"
+        links.new(mapping.outputs["Vector"], tex_rough.inputs["Vector"])
+        links.new(tex_rough.outputs["Color"], bsdf.inputs["Roughness"])
+    else:
+        bsdf.inputs["Roughness"].default_value = 0.12
+
+    if nor_file.exists():
+        tex_nor = nodes.new(type="ShaderNodeTexImage")
+        tex_nor.image = bpy.data.images.load(str(nor_file), check_existing=True)
+        tex_nor.image.colorspace_settings.name = "Non-Color"
+        norm_map = nodes.new(type="ShaderNodeNormalMap")
+        norm_map.inputs["Strength"].default_value = 0.6
+        links.new(mapping.outputs["Vector"], tex_nor.inputs["Vector"])
+        links.new(tex_nor.outputs["Color"], norm_map.inputs["Color"])
+        links.new(norm_map.outputs["Normal"], bsdf.inputs["Normal"])
+
+    return mat
+
+
 def create_all_materials() -> dict[str, bpy.types.Material]:
     return {
         "concrete_facade": create_pbr_material(

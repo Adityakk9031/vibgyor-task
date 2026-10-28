@@ -251,14 +251,14 @@ def configure_cycles(scene: bpy.types.Scene, samples: int = 4, exposure: float =
     scene.cycles.device = "CPU"
     scene.cycles.samples = samples
     scene.cycles.use_adaptive_sampling = True
-    scene.cycles.adaptive_threshold = 0.10
+    scene.cycles.adaptive_threshold = 0.08
     if hasattr(scene.cycles, "use_denoising"):
         scene.cycles.use_denoising = True
-    scene.cycles.max_bounces = 2
-    scene.cycles.diffuse_bounces = 2
-    scene.cycles.glossy_bounces = 1
-    scene.cycles.transmission_bounces = 2
-    scene.cycles.transparent_max_bounces = 3
+    scene.cycles.max_bounces = 4
+    scene.cycles.diffuse_bounces = 3
+    scene.cycles.glossy_bounces = 2
+    scene.cycles.transmission_bounces = 3
+    scene.cycles.transparent_max_bounces = 4
     if hasattr(scene.cycles, "caustics_reflective"):
         scene.cycles.caustics_reflective = False
         scene.cycles.caustics_refractive = False
@@ -408,12 +408,12 @@ INTERIOR_SHOTS = [
         "filename": "interiors/type_a_2_kitchen_dining.png",
         "description": "Type A Interior 2: Kitchen & 6-Seater Dining Area",
         "mode": "interior",
-        "location": (7.85, 11.35, 4.72),
-        "target": (3.20, 9.75, 4.62),
-        "lens_mm": 17.0,
+        "location": (7.45, 10.85, 4.65),
+        "target": (3.20, 9.85, 4.45),
+        "lens_mm": 24.0,
         "shift_y": 0.0,
         "resolution": (2560, 1440),
-        "samples": 5,
+        "samples": 8,
     },
     {
         "id": "type_a_3_master_bedroom",
