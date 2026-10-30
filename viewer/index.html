@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Vibgyor — Interactive 3D Building, 360° Virtual Tour & Stills Viewer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121618'/%3E%3Cpath d='M16 14 L32 50 L48 14' stroke='%23d97736' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
   <style>
@@ -25,7 +28,8 @@
 
     /* Top Mode Navigation Bar */
     .mode-nav {
-      position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 30;
+      position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+      z-index: 1000 !important; pointer-events: auto !important;
       display: flex; gap: 6px; padding: 5px;
       background: var(--bg-panel); backdrop-filter: blur(14px);
       border: 1px solid var(--border-panel); border-radius: 999px;
@@ -33,8 +37,9 @@
     }
     .mode-tab {
       background: transparent; border: none; color: var(--text-muted);
-      padding: 8px 18px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
-      cursor: pointer; transition: all 0.18s ease; white-space: nowrap;
+      padding: 6px 14px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+      cursor: pointer !important; pointer-events: auto !important;
+      transition: all 0.18s ease; white-space: nowrap; user-select: none;
     }
     .mode-tab:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
     .mode-tab.active {
@@ -72,14 +77,14 @@
       box-shadow: 0 0 10px var(--accent-orange);
     }
 
-    /* Right Control Panel */
+    /* Right Control Panel (Compact 260px Tool Strip) */
     .side-panel {
-      position: absolute; top: 18px; right: 20px; z-index: 20;
-      width: 375px; max-height: calc(100vh - 36px); overflow-y: auto;
+      position: absolute; top: 18px; right: 16px; z-index: 20;
+      width: 260px; max-height: calc(100vh - 36px); overflow-y: auto;
       background: var(--bg-panel); backdrop-filter: blur(12px);
       border: 1px solid var(--border-panel); border-radius: 12px;
-      padding: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-      display: flex; flex-direction: column; gap: 14px;
+      padding: 10px 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      display: flex; flex-direction: column; gap: 8px;
     }
     .section-label {
       font-size: 10.5px; font-weight: 700; text-transform: uppercase;
@@ -192,24 +197,40 @@
       background: rgba(0,0,0,0.4); color: #cbd5e1;
     }
 
-    /* Interactive 2D Floor/Site Map inside 360° panel */
+    /* Interactive 2D Floor/Site Map inside 360° panel (Compact & Collapsible) */
     .map-box {
       background: rgba(10, 14, 17, 0.75); border: 1px solid var(--border-panel);
-      border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;
+      border-radius: 8px; padding: 7px 9px; display: flex; flex-direction: column; gap: 5px;
+      transition: all 0.2s ease;
     }
-    .map-filter-tabs { display: flex; gap: 4px; }
+    .map-box.minimized #pano-minimap,
+    .map-box.minimized .map-filter-tabs {
+      display: none !important;
+    }
+    .map-box.minimized {
+      cursor: pointer;
+    }
+    .map-box-header {
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .map-filter-tabs { display: flex; gap: 3px; }
     .map-filter-btn {
       flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border-panel);
-      color: var(--text-muted); font-size: 10.5px; font-weight: 700; padding: 5px 4px;
-      border-radius: 6px; cursor: pointer; text-align: center;
+      color: var(--text-muted); font-size: 9.5px; font-weight: 700; padding: 3px 2px;
+      border-radius: 5px; cursor: pointer; text-align: center;
     }
     .map-filter-btn.active {
       background: rgba(56, 189, 248, 0.2); border-color: var(--accent-blue); color: #fff;
     }
     #pano-minimap {
-      width: 100%; height: 225px; background: #0d1216; border-radius: 8px;
+      width: 100%; height: 110px; background: #0d1216; border-radius: 6px;
       border: 1px solid rgba(255,255,255,0.08); cursor: pointer; display: block;
     }
+    .map-toggle-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      color: var(--text-muted); padding: 1px 6px; border-radius: 4px; font-size: 10px; cursor: pointer;
+    }
+    .map-toggle-btn:hover { background: var(--accent-orange); color: #fff; }
 
     /* 3D Hotspots Floating Overlay in 360° View */
     #hotspot-layer {
@@ -238,6 +259,163 @@
     }
     .hotspot-pin:hover .hotspot-icon { background: #fff; color: var(--accent-orange); }
 
+    
+    
+    /* Clean View & Collapsible UI Enhancements */
+    #tour-mode-switch-hud {
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      z-index: 28; background: rgba(13, 17, 20, 0.94); backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 9999px;
+      padding: 4px; display: none; gap: 4px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      transition: all 0.25s ease;
+    }
+    #tour-mode-switch-hud.visible { display: flex; }
+
+    /* Hide selection banner in 360 mode to prevent overlap */
+    #app.mode-360 #selection-banner,
+    #app.mode-360 .footer-bar {
+      display: none !important;
+    }
+
+    /* Collapsible Spot Badge Card */
+    .spot-badge-card {
+      position: absolute; bottom: 24px; left: 20px; z-index: 40 !important;
+      background: rgba(13, 17, 20, 0.90); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px;
+      padding: 10px 14px; max-width: 300px; box-shadow: 0 10px 36px rgba(0,0,0,0.6);
+      pointer-events: auto; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .spot-badge-card.minimized {
+      max-width: fit-content; padding: 7px 14px;
+      background: rgba(13, 17, 20, 0.92);
+      border-color: var(--accent-orange);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .spot-badge-card.minimized .spot-desc-text,
+    .spot-badge-card.minimized .spot-actions-row {
+      display: none !important;
+    }
+    .spot-badge-card.minimized .spot-tag-pill {
+      margin-bottom: 0 !important; font-size: 10px;
+    }
+    .spot-badge-card.minimized .spot-title-text {
+      font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .spot-card-toggle-btn {
+      position: absolute; top: 10px; right: 12px;
+      background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.18);
+      color: #e5e7eb; width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s ease;
+    }
+    .spot-badge-card.minimized .spot-card-toggle-btn {
+      position: static; width: 20px; height: 20px; font-size: 11px;
+    }
+    .spot-card-toggle-btn:hover { background: var(--accent-orange); color: #fff; border-color: #fff; }
+
+    /* Non-Obtrusive Hotspot Buttons Dock */
+    #spot-hotspots-overlay {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: none; /* Hidden by default to keep the render completely clean */
+      gap: 6px; z-index: 35; pointer-events: auto;
+      background: rgba(13, 17, 20, 0.90); backdrop-filter: blur(14px);
+      padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      max-width: 80vw; overflow-x: auto;
+    }
+    #spot-hotspots-overlay.visible {
+      display: flex !important;
+    }
+    .spot-hotspot-btn {
+      position: static; transform: none;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff; padding: 7px 14px; border-radius: 9999px; font-size: 11.5px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: all 0.18s ease; pointer-events: auto; white-space: nowrap;
+    }
+    .spot-hotspot-btn:hover {
+      background: var(--accent-orange); color: #fff; border-color: #fff;
+      transform: scale(1.04); box-shadow: 0 4px 16px rgba(217, 119, 54, 0.6);
+    }
+
+    /* Clean View Fullscreen Mode */
+    #app.clean-view .side-panel,
+    #app.clean-view .header-bar,
+    #app.clean-view .footer-bar,
+    #app.clean-view .mode-nav,
+    #app.clean-view .spot-badge-card,
+    #app.clean-view #spot-hotspots-overlay {
+      display: none !important;
+    }
+    #app.clean-view #tour-mode-switch-hud {
+      top: 16px; background: rgba(13, 17, 20, 0.7);
+    }
+
+    /* Sidebar Collapse Toggle */
+    .side-panel {
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .side-panel.collapsed {
+      transform: translateX(calc(100% - 32px)) !important;
+    }
+    .sidebar-toggle-handle {
+      position: absolute; top: 14px; left: -34px; width: 34px; height: 38px;
+      background: var(--bg-panel); border: 1px solid var(--border-panel);
+      border-right: none; border-radius: 8px 0 0 8px; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 1005; font-size: 13px; transition: background 0.18s ease;
+    }
+    .sidebar-toggle-handle:hover { background: var(--accent-orange); }
+    
+    /* Tour Submode Switcher HUD */
+    #app.mode-360 .selection-banner {
+      display: none !important;
+    }
+    #tour-mode-switch-hud {
+      position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+      z-index: 45; background: rgba(13, 17, 20, 0.92); backdrop-filter: blur(16px);
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 9999px;
+      padding: 4px; display: none; gap: 4px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    #tour-mode-switch-hud.visible { display: flex; }
+    .tour-switch-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 12px; font-weight: 700; padding: 7px 16px; border-radius: 9999px;
+      cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+    }
+    .tour-switch-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+    .tour-switch-btn.active {
+      background: var(--accent-orange); color: #fff; box-shadow: 0 4px 14px rgba(217, 119, 54, 0.45);
+    }
+
+    /* Spot Mode Viewport (Photorealistic 2560x1440 Spot Render + Clickable Hotspots) */
+    #spot-view-container {
+      position: absolute; inset: 0; z-index: 8;
+      background: #090c0e; overflow: hidden; display: none;
+    }
+    #spot-view-container.visible { display: block; }
+    #spot-zoom-viewport {
+      width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; cursor: grab;
+    }
+    #spot-zoom-viewport:active { cursor: grabbing; }
+    #spot-view-img {
+      max-width: 100%; max-height: 100%; object-fit: contain; display: block;
+      transition: transform 0.1s ease-out, opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none; -webkit-user-drag: none;
+    }
+
+
+    .spot-tag-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10.5px; font-weight: 800; color: #ff9142;
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;
+    }
+    .spot-title-text { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+    .spot-desc-text { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
+    
     /* Stills Gallery Overlay View */
     #gallery-overlay {
       position: absolute; inset: 0; z-index: 25;
@@ -294,10 +472,11 @@
     .fps-badge { color: #6ee7b7; font-weight: 700; font-variant-numeric: tabular-nums; }
 
     #loading-overlay {
-      position: absolute; inset: 0; z-index: 50;
+      position: absolute; inset: 0; z-index: 25;
       background: rgba(15, 18, 20, 0.92);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 12px; transition: opacity 0.35s ease;
+      pointer-events: none !important;
     }
     .spinner {
       width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.15);
@@ -316,7 +495,7 @@
     }
   </script>
 </head>
-<body>
+<body id="app">
   <div id="canvas-container">
     <div id="loading-overlay">
       <div class="spinner"></div>
@@ -324,10 +503,10 @@
     </div>
 
     <!-- Top Mode Switcher -->
-    <div class="mode-nav">
-      <button class="mode-tab active" id="tab-3d">🏢 3D Building Model (.glb)</button>
-      <button class="mode-tab" id="tab-360">🌐 360° Virtual Tour (16 Views)</button>
-      <button class="mode-tab" id="tab-gallery">🖼️ Stills Gallery (17 Renders)</button>
+    <div class="mode-nav" id="main-mode-nav">
+      <button class="mode-tab active" id="tab-3d" onclick="window.setViewerMode && window.setViewerMode('3d')">🏢 3D Building</button>
+      <button class="mode-tab" id="tab-360" onclick="window.setViewerMode && window.setViewerMode('360')">🌐 360° Tour (16)</button>
+      <button class="mode-tab" id="tab-gallery" onclick="window.setViewerMode && window.setViewerMode('gallery')">🖼️ Stills (20)</button>
     </div>
 
     <!-- Top Left Header -->
@@ -347,6 +526,48 @@
     </div>
 
     <!-- 3D Hotspot Pins Layer (Active in 360° Virtual Tour Mode) -->
+    
+        <!-- Tour Sub-Mode Switcher HUD (Spot vs 360 Sphere + Clean View) -->
+    <div id="tour-mode-switch-hud" class="tour-switch-bar">
+      <button id="hud-btn-spot" class="tour-switch-btn" title="Still photo of this room (2560 × 1440)">
+        <span>🖼️ Still Photo</span>
+      </button>
+      <button id="hud-btn-sphere" class="tour-switch-btn active" title="Look around 360° from this spot">
+        <span>🌐 360° View</span>
+      </button>
+      <button id="btn-toggle-hotspots" class="tour-switch-btn" title="Toggle room walk buttons on/off">
+        <span id="hotspots-btn-label">🏷️ Hotspots: OFF</span>
+      </button>
+      <button id="btn-clean-view" class="tour-switch-btn" title="Toggle Clean View (hide/show all UI cards)">
+        <span id="clean-view-btn-label">👁️ Clean View</span>
+      </button>
+    </div>
+
+    <!-- Spot Mode Viewport (Photorealistic 2560x1440 Spot Render + Clickable Hotspots) -->
+    <div id="spot-view-container">
+      <div id="spot-zoom-viewport">
+        <img id="spot-view-img" src="" alt="Photorealistic Spot View" draggable="false" />
+      </div>
+      <div id="spot-hotspots-overlay"></div>
+            <div class="spot-badge-card" id="spot-badge-card">
+        <button class="spot-card-toggle-btn" id="btn-toggle-spot-card" title="Minimize / Expand Card">✕</button>
+        <div class="spot-tag-pill">
+          <span>●</span>
+          <span id="spot-badge-tag">AI concept still · not to exact layout</span>
+        </div>
+        <div class="spot-title-text" id="spot-badge-title">Type A — Drawing Room</div>
+        <div class="spot-desc-text" id="spot-badge-desc">Front 4BHK Drawing Room (6.53 × 3.65 m) with L-shaped boucle sofa, nested marble/brass coffee tables & East balcony daylight.</div>
+        <div class="spot-actions-row" style="margin-top:10px; display:flex; gap:8px;">
+          <button id="btn-spot-to-sphere" class="btn active" style="font-size:11px; padding:6px 12px; font-weight:700;">
+            🌐 Switch to 360° Look-Around
+          </button>
+          <button id="btn-spot-lightbox" class="btn" style="font-size:11px; padding:6px 12px;">
+            🔍 Fullscreen Zoom
+          </button>
+        </div>
+      </div>
+    </div>
+    
     <div id="hotspot-layer"></div>
 
     <!-- Right Control Sidebar: Mode 1 (3D Building Inspector) -->
@@ -416,20 +637,37 @@
       </div>
     </div>
 
+    <!-- Floating Expand Button when Sidebar is Hidden -->
+    <button id="btn-expand-sidebar" class="btn" style="position:absolute; top:18px; right:16px; z-index:100; display:none; padding:6px 14px; font-weight:700; background:rgba(18,22,24,0.92); border:1px solid var(--accent-orange); color:#fff; border-radius:999px; box-shadow:0 8px 24px rgba(0,0,0,0.6); cursor:pointer;">
+      🗺️ Viewpoints & Map ❮
+    </button>
+
     <!-- Right Control Sidebar: Mode 2 (360° Virtual Tour Navigator & Interactive Map) -->
     <div class="side-panel" id="panel-360" style="display:none;">
-      <div class="map-box">
-        <div class="section-label" style="margin-bottom:2px; display:flex; justify-content:space-between;">
-          <span>Interactive Floor / Site Map</span>
-          <span style="color:var(--accent-blue); font-size:10px;">Click any pin to jump</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:4px;">
+        <span style="font-weight:700; font-size:12px; color:#fff;">360° Viewpoints (16)</span>
+        <button id="btn-toggle-sidebar" class="btn" style="padding:3px 8px; font-size:10px; font-weight:700;">❯ Hide</button>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div class="section-label">Spot View Style</div>
+        <div class="btn-grid" style="grid-template-columns: 1fr 1fr; gap:6px;">
+          <button class="btn" id="btn-submode-spot" style="font-weight:700;">🖼️ Still Photo</button>
+          <button class="btn active" id="btn-submode-sphere" style="font-weight:700;">🌐 360° View</button>
         </div>
-        <div class="map-filter-tabs">
+      </div>
+    
+      <div class="map-box" id="map-box-container">
+        <div class="map-box-header" id="map-box-header">
+          <span class="section-label" style="margin-bottom:0;">Floor & Site Map</span>
+          <button class="map-toggle-btn" id="btn-toggle-minimap" title="Collapse / Expand Map">— Min</button>
+        </div>
+        <div class="map-filter-tabs" id="map-filter-tabs">
           <button class="map-filter-btn active" data-mapgroup="all">All (16)</button>
           <button class="map-filter-btn" data-mapgroup="bldg">Amenities (6)</button>
           <button class="map-filter-btn" data-mapgroup="typeA">Type A (5)</button>
           <button class="map-filter-btn" data-mapgroup="typeB">Type B (5)</button>
         </div>
-        <canvas id="pano-minimap" width="320" height="225"></canvas>
+        <canvas id="pano-minimap" width="236" height="110"></canvas>
       </div>
 
       <div>
@@ -442,6 +680,7 @@
         <div style="font-size:11.5px; color:var(--text-muted); line-height:1.45;" id="pano-info-desc">
           Drag anywhere on the 360° sphere to look around, scroll to zoom, or click the glowing <strong>3D Hotspot Portals</strong> in the scene to walk from room to room.
         </div>
+        <button id="btn-view-spot-still" class="btn active" style="margin-top:10px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:700;"><span>🔍 Inspect Full 2560×1440 Render</span></button>
       </div>
     </div>
 
@@ -476,10 +715,20 @@
     // =========================================================================
     // 1. 16 Equirectangular 360° Panoramas Registry + Connected Walkthrough Graph
     // =========================================================================
+    // Bump when renders are re-imported (pipeline/import_ai_results.py) so browsers drop cached images
+    const ASSET_VERSION = 'model-ai-1';
+
+    // Images rendered from the 3D model are listed in provenance.json (written by pipeline/import_*);
+    // any still not listed is an earlier AI concept image and is labelled that way
+    let PROVENANCE = {};
+    const stillIdOf = (path) => path.split('/').pop().split('?')[0].replace(/\.png$/, '');
+    const stillLabel = (id) => (PROVENANCE[id] === 'model' ? 'Rendered from the 3D model' : 'AI concept still · not to exact layout');
+
     const PANORAMAS = [
       // Building & Amenities (6)
       {
         id: 'pano_bldg_1_entrance_gate',
+        spotImg: './exteriors/shot_4_entrance_closeup.png?v=' + ASSET_VERSION,
         num: 1,
         title: '1 · Entrance Gate & Canopy Drive',
         short: 'Entrance Gate',
@@ -492,6 +741,7 @@
       },
       {
         id: 'pano_bldg_2_entrance_lobby',
+        spotImg: './amenities/amenity_3_entrance_lobby.png?v=' + ASSET_VERSION,
         num: 2,
         title: '2 · Ground Floor Entrance Lobby & Lifts',
         short: 'Entrance Lobby',
@@ -504,6 +754,7 @@
       },
       {
         id: 'pano_bldg_3_basement_parking',
+        spotImg: './amenities/amenity_1_basement_parking.png?v=' + ASSET_VERSION,
         num: 3,
         title: '3 · Basement Parking & Curved Ramp',
         short: 'Basement B1',
@@ -516,6 +767,7 @@
       },
       {
         id: 'pano_bldg_4_garden_stilt',
+        spotImg: './amenities/amenity_2_stilt_parking.png?v=' + ASSET_VERSION,
         num: 4,
         title: '4 · Landscape Garden Deck & Stilt Parking',
         short: 'Garden & Stilt',
@@ -528,6 +780,7 @@
       },
       {
         id: 'pano_bldg_5_terrace_pergola_kids',
+        spotImg: './amenities/amenity_5_terrace_amenities.png?v=' + ASSET_VERSION,
         num: 5,
         title: '5 · Terrace Pergola Lounge & Kids\' Play Area',
         short: 'Terrace Pergola',
@@ -540,6 +793,7 @@
       },
       {
         id: 'pano_bldg_6_terrace_gym',
+        spotImg: './amenities/amenity_6_terrace_gym.png?v=' + ASSET_VERSION,
         num: 6,
         title: '6 · Terrace Fitness Gym & Yoga Deck',
         short: 'Terrace Gym',
@@ -554,6 +808,7 @@
       // Type A Interior (5)
       {
         id: 'pano_type_a_1_drawing_room',
+        spotImg: './interiors/type_a_1_drawing_room.png?v=' + ASSET_VERSION,
         num: 7,
         title: '7 · Type A — Drawing Room (6.53 × 3.65 m)',
         short: 'A · Drawing Room',
@@ -566,6 +821,7 @@
       },
       {
         id: 'pano_type_a_2_dining_kitchen',
+        spotImg: './interiors/type_a_2_kitchen_dining.png?v=' + ASSET_VERSION,
         num: 8,
         title: '8 · Type A — Kitchen & Dining (6.59 × 3.20 m)',
         short: 'A · Kitchen/Dining',
@@ -578,6 +834,7 @@
       },
       {
         id: 'pano_type_a_3_master_bedroom',
+        spotImg: './interiors/type_a_3_master_bedroom.png?v=' + ASSET_VERSION,
         num: 9,
         title: '9 · Type A — Master Bedroom SE (3.96 × 5.02 m)',
         short: 'A · Master Bed',
@@ -590,6 +847,7 @@
       },
       {
         id: 'pano_type_a_4_second_bedroom',
+        spotImg: './interiors/type_a_4_second_bedroom.png?v=' + ASSET_VERSION,
         num: 10,
         title: '10 · Type A — Second Bedroom (4.56 × 3.20 m)',
         short: 'A · Second Bed',
@@ -602,6 +860,7 @@
       },
       {
         id: 'pano_type_a_5_balcony_deck',
+        spotImg: './interiors/type_a_5_third_bedroom.png?v=' + ASSET_VERSION,
         num: 11,
         title: '11 · Type A — Third Bedroom SW (3.36 × 4.20 m)',
         short: 'A · Third Bed SW',
@@ -616,6 +875,7 @@
       // Type B Interior (5)
       {
         id: 'pano_type_b_1_drawing_room',
+        spotImg: './interiors/type_b_1_drawing_room.png?v=' + ASSET_VERSION,
         num: 12,
         title: '12 · Type B — Drawing Room (6.31 × 3.65 m)',
         short: 'B · Drawing Room',
@@ -628,6 +888,7 @@
       },
       {
         id: 'pano_type_b_2_dining_kitchen',
+        spotImg: './interiors/type_b_2_kitchen_dining.png?v=' + ASSET_VERSION,
         num: 13,
         title: '13 · Type B — Kitchen & Dining (6.11 × 3.20 m)',
         short: 'B · Kitchen/Dining',
@@ -640,6 +901,7 @@
       },
       {
         id: 'pano_type_b_3_master_bedroom',
+        spotImg: './interiors/type_b_3_master_bedroom.png?v=' + ASSET_VERSION,
         num: 14,
         title: '14 · Type B — Master Bedroom NE (5.34 × 3.65 m)',
         short: 'B · Master Bed',
@@ -652,6 +914,7 @@
       },
       {
         id: 'pano_type_b_4_second_bedroom',
+        spotImg: './interiors/type_b_4_second_bedroom.png?v=' + ASSET_VERSION,
         num: 15,
         title: '15 · Type B — Second Bedroom NW (4.73 × 3.35 m)',
         short: 'B · Second Bed',
@@ -664,6 +927,7 @@
       },
       {
         id: 'pano_type_b_5_balcony_deck',
+        spotImg: './interiors/type_b_5_third_bedroom.png?v=' + ASSET_VERSION,
         num: 16,
         title: '16 · Type B — Third Bedroom Mid-West (3.20 × 3.96 m)',
         short: 'B · Third Bed',
@@ -679,31 +943,34 @@
     // Stills Gallery Registry (5 Amenity + 8 Interior + 4 Exterior = 17 Renders @ 2560x1440)
     const GALLERY_SECTIONS = [
       {
-        title: 'Amenity Stills (5 Views · 2560 × 1440 px)',
+        title: 'Amenity Stills (6 Views · 2560 × 1440 px)',
         items: [
           { title: 'Amenity 1 · Basement Parking', sub: 'Car bays, 20 two-wheeler bays, sloped ramp, safety columns & LEDs', paths: ['./amenities/amenity_1_basement_parking.png', '../outputs/amenities/amenity_1_basement_parking.png'] },
           { title: 'Amenity 2 · Ground Stilt Parking', sub: 'Hollow-plinth parking bays, parked sedans, columns & soffit lights', paths: ['./amenities/amenity_2_stilt_parking.png', '../outputs/amenities/amenity_2_stilt_parking.png'] },
           { title: 'Amenity 3 · Entrance Lobby & Lifts', sub: 'Travertine marble, fluted wood wall, bronze lifts, chandelier & sofa', paths: ['./amenities/amenity_3_entrance_lobby.png', '../outputs/amenities/amenity_3_entrance_lobby.png'] },
           { title: 'Amenity 4 · Landscape Garden & Drive', sub: 'West wooden deck benches, planter shrubs, bollards & entrance drive', paths: ['./amenities/amenity_4_landscape_drive.png', '../outputs/amenities/amenity_4_landscape_drive.png'] },
           { title: 'Amenity 5 · Terrace Amenities', sub: 'Slatted pergola seating lounge, kids\' play area & glass fitness gym', paths: ['./amenities/amenity_5_terrace_amenities.png', '../outputs/amenities/amenity_5_terrace_amenities.png'] },
+          { title: 'Amenity 6 · Terrace Glass Fitness Gym', sub: 'Glass-walled rooftop fitness studio with treadmills, dumbbells & city skyline', paths: ['./amenities/amenity_6_terrace_gym.png', '../outputs/amenities/amenity_6_terrace_gym.png'] },
         ]
       },
       {
-        title: 'Type A (Front 4BHK · 160.05 sq.m) Interior Stills (4 Views · 2560 × 1440 px)',
+        title: 'Type A (Front 4BHK · 160.05 sq.m) Interior Stills (5 Views · 2560 × 1440 px)',
         items: [
           { title: 'Type A · Drawing Room (6.53 × 3.65 m)', sub: 'L-shaped sofa, nested coffee tables, fluted wall & East balcony light', paths: ['./interiors/type_a_1_drawing_room.png', '../outputs/interiors/type_a_1_drawing_room.png'] },
           { title: 'Type A · Kitchen & Dining (6.59 × 3.20 m)', sub: '6-seater dining table, quartz L-counter & coral breakfast barstools', paths: ['./interiors/type_a_2_kitchen_dining.png', '../outputs/interiors/type_a_2_kitchen_dining.png'] },
           { title: 'Type A · Master Bedroom SE (3.96 × 5.02 m)', sub: 'King bed, olive pillows, fluted headboard wall & sliding wardrobe', paths: ['./interiors/type_a_3_master_bedroom.png', '../outputs/interiors/type_a_3_master_bedroom.png'] },
           { title: 'Type A · Second Bedroom (4.56 × 3.20 m)', sub: 'Queen bed, warm perimeter cove lighting, sheer curtains & wardrobe', paths: ['./interiors/type_a_4_second_bedroom.png', '../outputs/interiors/type_a_4_second_bedroom.png'] },
+          { title: 'Type A · Third Bedroom SW (3.36 × 4.20 m)', sub: 'South-West bedroom next to the front balcony', paths: ['./interiors/type_a_5_third_bedroom.png', '../outputs/interiors/type_a_5_third_bedroom.png'] },
         ]
       },
       {
-        title: 'Type B (Rear 4BHK · 143.18 sq.m) Interior Stills (4 Views · 2560 × 1440 px)',
+        title: 'Type B (Rear 4BHK · 143.18 sq.m) Interior Stills (5 Views · 2560 × 1440 px)',
         items: [
           { title: 'Type B · Drawing Room (6.31 × 3.65 m)', sub: 'Rear wing living room opening onto the West balcony deck', paths: ['./interiors/type_b_1_drawing_room.png', '../outputs/interiors/type_b_1_drawing_room.png'] },
           { title: 'Type B · Kitchen & Dining (6.11 × 3.20 m)', sub: '6-seater dining area and East modular kitchen with breakfast counter', paths: ['./interiors/type_b_2_kitchen_dining.png', '../outputs/interiors/type_b_2_kitchen_dining.png'] },
           { title: 'Type B · Master Bedroom NE (5.34 × 3.65 m)', sub: 'North-East corner Master Suite with king bed & cove lighting', paths: ['./interiors/type_b_3_master_bedroom.png', '../outputs/interiors/type_b_3_master_bedroom.png'] },
           { title: 'Type B · Second Bedroom NW (4.73 × 3.35 m)', sub: 'North-West bedroom with upholstered bed, nightstands & wardrobe', paths: ['./interiors/type_b_4_second_bedroom.png', '../outputs/interiors/type_b_4_second_bedroom.png'] },
+          { title: 'Type B · Third Bedroom Mid-West (3.20 × 3.96 m)', sub: 'Middle-West bedroom with fluted wood headboard & teal accents', paths: ['./interiors/type_b_5_third_bedroom.png', '../outputs/interiors/type_b_5_third_bedroom.png'] },
         ]
       },
       {
@@ -971,6 +1238,14 @@
       );
     }
     loadModel(0);
+    // Fail-safe: Ensure loading overlay hides after 4.5 seconds maximum
+    setTimeout(() => {
+      if (loadingOverlay) {
+        loadingOverlay.style.opacity = '0';
+        loadingOverlay.style.display = 'none';
+      }
+    }, 4500);
+
 
     function updateCutawayVisibility() {
       FLOORS_META.forEach((f) => {
@@ -1239,9 +1514,9 @@
         return;
       }
       const candidates = [
-        `./panoramas/${panoId}.png`,
-        `../outputs/panoramas/${panoId}.png`,
-        `../outputs/bonus_type_a_panorama_360.png`
+        `./panoramas/${panoId}.png?v=${ASSET_VERSION}`,
+        `../outputs/panoramas/${panoId}.png?v=${ASSET_VERSION}`,
+        `../outputs/bonus_type_a_panorama_360.png?v=360true`
       ];
       function tryIdx(i) {
         if (i >= candidates.length) return;
@@ -1274,21 +1549,193 @@
       document.getElementById('banner-dot').style.background = '#38bdf8';
       document.getElementById('banner-text').textContent = `360° View · ${target.title} (${target.level})`;
 
+      // Update Spot View Image & Details
+      if (spotBadgeTitle) spotBadgeTitle.textContent = target.title;
+      if (spotBadgeDesc) spotBadgeDesc.textContent = target.desc;
+      if (spotBadgeTag) spotBadgeTag.textContent = `${stillLabel(stillIdOf(target.spotImg || ''))} (2560 × 1440) · Spot #${target.num}`;
+      if (target.spotImg && spotImg) {
+        spotZoom = 1.0;
+        spotPanX = 0;
+        spotPanY = 0;
+        applySpotTransform();
+        spotImg.style.opacity = '0';
+        spotImg.src = target.spotImg;
+        spotImg.onload = () => { spotImg.style.opacity = '1'; };
+      }
+
       loadPanoramaTexture(target.id, (tex) => {
         sphereMat.map = tex;
         sphereMat.needsUpdate = true;
       });
 
+      rebuildSpotHotspots();
       rebuildHotspotPins();
       drawMinimap();
     }
 
+    
+    // =========================================================================
+    // 3.5 Spot View Sub-Mode Logic & Clickable Hotspots
+    // =========================================================================
+    let tourSubMode = 'sphere'; // 'sphere' (photoreal 360° of the model, default) | 'spot' (still photo of the room)
+    const tourHud = document.getElementById('tour-mode-switch-hud');
+    const hudBtnSpot = document.getElementById('hud-btn-spot');
+    const hudBtnSphere = document.getElementById('hud-btn-sphere');
+    const btnSubmodeSpot = document.getElementById('btn-submode-spot');
+    const btnSubmodeSphere = document.getElementById('btn-submode-sphere');
+    const spotContainer = document.getElementById('spot-view-container');
+    const spotImg = document.getElementById('spot-view-img');
+    const spotViewport = document.getElementById('spot-zoom-viewport');
+    const spotBadgeTitle = document.getElementById('spot-badge-title');
+    const spotBadgeDesc = document.getElementById('spot-badge-desc');
+    const spotBadgeTag = document.getElementById('spot-badge-tag');
+
+    let spotZoom = 1.0;
+    let spotPanX = 0;
+    let spotPanY = 0;
+    let isPanningSpot = false;
+    let panStartX = 0;
+    let panStartY = 0;
+
+    function applySpotTransform() {
+      if (!spotImg) return;
+      spotImg.style.transform = `scale(${spotZoom}) translate(${spotPanX}px, ${spotPanY}px)`;
+    }
+
+    if (spotViewport) {
+      spotViewport.addEventListener('wheel', (e) => {
+        if (tourSubMode !== 'spot') return;
+        e.preventDefault();
+        const delta = e.deltaY * -0.0015;
+        spotZoom = Math.min(Math.max(1.0, spotZoom + delta), 2.8);
+        if (spotZoom <= 1.01) {
+          spotPanX = 0;
+          spotPanY = 0;
+        }
+        applySpotTransform();
+      }, { passive: false });
+
+      spotViewport.addEventListener('pointerdown', (e) => {
+        if (tourSubMode !== 'spot' || spotZoom <= 1.05) return;
+        isPanningSpot = true;
+        panStartX = e.clientX - spotPanX;
+        panStartY = e.clientY - spotPanY;
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isPanningSpot) return;
+        spotPanX = e.clientX - panStartX;
+        spotPanY = e.clientY - panStartY;
+        applySpotTransform();
+      });
+
+      window.addEventListener('pointerup', () => { isPanningSpot = false; });
+      spotViewport.addEventListener('dblclick', () => {
+        spotZoom = spotZoom > 1.2 ? 1.0 : 1.8;
+        spotPanX = 0;
+        spotPanY = 0;
+        applySpotTransform();
+      });
+    }
+
+    function rebuildSpotHotspots() {
+      const spotOverlay = document.getElementById('spot-hotspots-overlay');
+      if (!spotOverlay) return;
+      spotOverlay.innerHTML = '';
+      if (activeMode !== '360' || tourSubMode !== 'spot' || !currentPano || !hotspotsVisible) {
+        spotOverlay.classList.remove('visible');
+        return;
+      }
+      spotOverlay.classList.add('visible');
+
+      const links = currentPano.links || [];
+      links.forEach((targetId, idx) => {
+        const dest = PANORAMAS.find((p) => p.id === targetId);
+        if (!dest) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'spot-hotspot-btn';
+        // Elegant bottom dock layout (no clutter across the room)
+        btn.style.position = 'static';
+        btn.style.transform = 'none';
+
+        btn.innerHTML = `
+          <span style="font-size:13px; color:#ff9142;">📍</span>
+          <span>Step into <strong>${dest.short}</strong></span>
+          <span style="color:#ff9142; opacity:0.85; font-size:11px; margin-left:3px;">↗</span>
+        `;
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          loadPanorama(dest.id);
+        });
+        spotOverlay.appendChild(btn);
+      });
+    }
+
+    function setTourSubMode(subMode) {
+      tourSubMode = subMode;
+      if (hudBtnSpot) hudBtnSpot.classList.toggle('active', subMode === 'spot');
+      if (hudBtnSphere) hudBtnSphere.classList.toggle('active', subMode === 'sphere');
+      if (btnSubmodeSpot) btnSubmodeSpot.classList.toggle('active', subMode === 'spot');
+      if (btnSubmodeSphere) btnSubmodeSphere.classList.toggle('active', subMode === 'sphere');
+
+      if (activeMode === '360') {
+        if (subMode === 'spot') {
+          spotContainer.classList.add('visible');
+          hotspotLayer.style.display = 'none';
+          rebuildSpotHotspots();
+          footerHelp.textContent = '🖼️ Still Photo (2560×1440): Scroll to zoom · Drag to pan · Click buttons or Minimap to switch spots';
+        } else {
+          spotContainer.classList.remove('visible');
+          hotspotLayer.style.display = 'block';
+          rebuildHotspotPins();
+          footerHelp.textContent = '🌐 360° Sphere: Left-drag to look around 360° · Scroll to zoom FOV · Click 3D Portals or Minimap Pins to walk';
+        }
+        const bannerText = document.getElementById('banner-text');
+        if (currentPano && bannerText) {
+          bannerText.textContent = `${subMode === 'spot' ? '🖼️ Still Photo' : '🌐 360° View'} · ${currentPano.title} (${currentPano.level})`;
+        }
+      }
+    }
+
+    if (hudBtnSpot) hudBtnSpot.addEventListener('click', () => setTourSubMode('spot'));
+    if (hudBtnSphere) hudBtnSphere.addEventListener('click', () => setTourSubMode('sphere'));
+    if (btnSubmodeSpot) btnSubmodeSpot.addEventListener('click', () => setTourSubMode('spot'));
+    if (btnSubmodeSphere) btnSubmodeSphere.addEventListener('click', () => setTourSubMode('sphere'));
+
+    const btnSpotToSphere = document.getElementById('btn-spot-to-sphere');
+    if (btnSpotToSphere) {
+      btnSpotToSphere.addEventListener('click', () => setTourSubMode('sphere'));
+    }
+
+    const btnSpotLightbox = document.getElementById('btn-spot-lightbox');
+    if (btnSpotLightbox) {
+      btnSpotLightbox.addEventListener('click', () => {
+        if (currentPano && currentPano.spotImg) {
+          lightboxImg.src = currentPano.spotImg;
+          lightboxCaption.textContent = `${currentPano.title} — Ultra-HD Architectural Render (2560×1440)`;
+          lightboxModal.classList.add('visible');
+        }
+      });
+    }
+
+    const btnViewSpotStill = document.getElementById('btn-view-spot-still');
+    if (btnViewSpotStill) {
+      btnViewSpotStill.addEventListener('click', () => {
+        if (currentPano && currentPano.spotImg) {
+          lightboxImg.src = currentPano.spotImg;
+          lightboxCaption.textContent = `${currentPano.title} — Ultra-HD Architectural Render (2560×1440)`;
+          lightboxModal.classList.add('visible');
+        }
+      });
+    }
+    
     // Create 3D Hotspot Portals inside the 360° sphere to walk from room to room
     const activeHotspotEls = [];
     function rebuildHotspotPins() {
       hotspotLayer.innerHTML = '';
       activeHotspotEls.length = 0;
-      if (activeMode !== '360' || !currentPano) return;
+      if (activeMode !== '360' || tourSubMode !== 'sphere' || !currentPano) return;
 
       (currentPano.links || []).forEach((targetId, idx) => {
         const dest = PANORAMAS.find((p) => p.id === targetId);
@@ -1349,11 +1796,11 @@
       });
     }
 
-    // Interactive 2D Floor & Site Minimap Canvas
+    // Interactive 2D Floor & Site Minimap Canvas (Scales to compact 236x110)
     function planToCanvas(x, y) {
       // Plan X in [-4.5, 15.0], Plan Y in [-5.0, 42.0]
-      const cx = 36 + ((x + 4.5) / 19.5) * 145;
-      const cy = 210 - ((y + 5.0) / 47.0) * 195;
+      const cx = 14 + ((x + 4.5) / 19.5) * 44;
+      const cy = 98 - ((y + 5.0) / 47.0) * 88;
       return [cx, cy];
     }
 
@@ -1396,25 +1843,26 @@
       ctxMap.fillRect(bx0, by1, bx1 - bx0, by0 - by1);
       ctxMap.strokeRect(bx0, by1, bx1 - bx0, by0 - by1);
 
-      // Labels on right legend area
+      // Labels on right legend area (Compact Layout)
       ctxMap.fillStyle = '#9ca3af';
-      ctxMap.font = 'bold 10px sans-serif';
-      ctxMap.fillText('NORTH ↑', 205, 24);
+      ctxMap.font = 'bold 9px sans-serif';
+      ctxMap.fillText('NORTH ↑', 68, 16);
       ctxMap.fillStyle = '#ffad75';
-      ctxMap.fillText('■ Type A (Front)', 205, 52);
+      ctxMap.fillText('■ Type A', 68, 33);
       ctxMap.fillStyle = '#b5e0c0';
-      ctxMap.fillText('■ Type B (Rear)', 205, 70);
+      ctxMap.fillText('■ Type B', 125, 33);
       ctxMap.fillStyle = '#38bdf8';
-      ctxMap.fillText('● Amenities (6)', 205, 88);
+      ctxMap.fillText('● Amenities', 180, 33);
       ctxMap.fillStyle = '#d1d5db';
-      ctxMap.font = '10px sans-serif';
-      ctxMap.fillText('Active View:', 205, 118);
+      ctxMap.font = '9px sans-serif';
+      ctxMap.fillText('View:', 68, 55);
       ctxMap.fillStyle = '#fff';
-      ctxMap.font = 'bold 10.5px sans-serif';
-      ctxMap.fillText(currentPano ? currentPano.short : '', 205, 134);
+      ctxMap.font = 'bold 9.5px sans-serif';
+      const shortTitle = (currentPano ? currentPano.short : '').slice(0, 24);
+      ctxMap.fillText(shortTitle, 96, 55);
       ctxMap.fillStyle = '#9ca3af';
-      ctxMap.font = '10px sans-serif';
-      ctxMap.fillText(currentPano ? currentPano.level : '', 205, 149);
+      ctxMap.font = '9px sans-serif';
+      ctxMap.fillText(currentPano ? currentPano.level : '', 68, 72);
 
       // Draw active camera FOV radar cone
       if (currentPano) {
@@ -1503,12 +1951,13 @@
         const card = document.createElement('div');
         card.className = 'gallery-card';
         const img = document.createElement('img');
-        img.src = item.paths[0];
-        img.onerror = () => { if (item.paths[1]) img.src = item.paths[1]; };
+        img.src = `${item.paths[0]}?v=${ASSET_VERSION}`;
+        img.onerror = () => { if (item.paths[1]) img.src = `${item.paths[1]}?v=${ASSET_VERSION}`; };
         card.innerHTML = `
           <div class="gallery-card-body">
             <div class="gallery-card-title">${item.title}</div>
             <div class="gallery-card-sub">${item.sub}</div>
+            <div class="gallery-card-sub provenance-tag" data-still="${stillIdOf(item.paths[0])}">${stillLabel(stillIdOf(item.paths[0]))}</div>
           </div>
         `;
         card.prepend(img);
@@ -1522,6 +1971,17 @@
       secEl.appendChild(grid);
       galleryContent.appendChild(secEl);
     });
+
+    function refreshProvenanceLabels() {
+      document.querySelectorAll('.provenance-tag').forEach((el) => { el.textContent = stillLabel(el.dataset.still); });
+      if (currentPano && currentPano.spotImg && spotBadgeTag) {
+        spotBadgeTag.textContent = `${stillLabel(stillIdOf(currentPano.spotImg))} (2560 × 1440) · Spot #${currentPano.num}`;
+      }
+    }
+    fetch(`./provenance.json?v=${ASSET_VERSION}`)
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((p) => { PROVENANCE = p; refreshProvenanceLabels(); })
+      .catch(() => {});
 
     document.getElementById('btn-close-lightbox').addEventListener('click', () => {
       lightboxModal.classList.remove('visible');
@@ -1543,30 +2003,50 @@
 
     function setViewerMode(mode) {
       activeMode = mode;
+      const appEl = document.getElementById('app') || document.body;
+      if (appEl) appEl.classList.toggle('mode-360', mode === '360');
       tab3D.classList.toggle('active', mode === '3d');
       tab360.classList.toggle('active', mode === '360');
       tabGallery.classList.toggle('active', mode === 'gallery');
 
       panel3D.style.display = mode === '3d' ? 'flex' : 'none';
       panel360.style.display = mode === '360' ? 'flex' : 'none';
+      if (mode !== '360' && btnExpandSidebar) btnExpandSidebar.style.display = 'none';
       galleryOverlay.classList.toggle('visible', mode === 'gallery');
       controls3D.enabled = (mode === '3d');
 
+      if (tourHud) tourHud.classList.toggle('visible', mode === '360');
+
+      if (loadingOverlay && mode !== '3d') {
+        loadingOverlay.style.opacity = '0';
+        loadingOverlay.style.display = 'none';
+      }
+
       if (mode === '360') {
-        footerHelp.textContent = 'Left-drag: Look around 360° · Scroll: FOV Zoom · Click 3D Hotspots or Minimap Pins: Walk between rooms';
+        setTourSubMode(tourSubMode);
         loadPanorama(currentPano.id);
       } else if (mode === '3d') {
+        if (spotContainer) spotContainer.classList.remove('visible');
         hotspotLayer.innerHTML = '';
         footerHelp.textContent = 'Left-drag: Orbit · Right-drag: Pan · Scroll: Zoom · Click Building or Badges: Focus Floor / Type A / Type B';
         selectFloorAndUnit(selectedFloor, selectedUnit, false);
       } else {
+        if (spotContainer) spotContainer.classList.remove('visible');
         hotspotLayer.innerHTML = '';
+        footerHelp.textContent = 'Each card says whether it is rendered from the 3D model or an AI concept still (look and feel, not to exact layout). Click any card to open it full size';
       }
     }
 
     tab3D.addEventListener('click', () => setViewerMode('3d'));
     tab360.addEventListener('click', () => setViewerMode('360'));
     tabGallery.addEventListener('click', () => setViewerMode('gallery'));
+    window.setViewerMode = setViewerMode;
+
+    // Auto-detect mode from URL query or hash (e.g. #360 or ?mode=360)
+    const initialModeMatch = window.location.hash.match(/#(360|3d|gallery)/) || window.location.search.match(/mode=(360|3d|gallery)/);
+    if (initialModeMatch && initialModeMatch[1]) {
+      setViewerMode(initialModeMatch[1]);
+    }
 
     // =========================================================================
     // 6. Pointer Interaction: 3D Raycasting & 360° Drag-to-Look
@@ -1672,6 +2152,95 @@
         lastTime = now;
       }
     }
+    
+    // UI Collapsible & Clean View Controls
+    const btnToggleSpotCard = document.getElementById('btn-toggle-spot-card');
+    const spotBadgeCard = document.getElementById('spot-badge-card');
+    if (btnToggleSpotCard && spotBadgeCard) {
+      btnToggleSpotCard.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isMin = spotBadgeCard.classList.toggle('minimized');
+        btnToggleSpotCard.textContent = isMin ? '＋' : '—';
+        btnToggleSpotCard.title = isMin ? 'Expand Card' : 'Minimize Card';
+      });
+      spotBadgeCard.addEventListener('click', () => {
+        if (spotBadgeCard.classList.contains('minimized')) {
+          spotBadgeCard.classList.remove('minimized');
+          btnToggleSpotCard.textContent = '—';
+        }
+      });
+    }
+
+        // Minimap Box Minimize Toggle
+    const mapBoxContainer = document.getElementById('map-box-container');
+    const btnToggleMinimap = document.getElementById('btn-toggle-minimap');
+    if (mapBoxContainer && btnToggleMinimap) {
+      btnToggleMinimap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isMin = mapBoxContainer.classList.toggle('minimized');
+        btnToggleMinimap.textContent = isMin ? '＋ Max' : '— Min';
+      });
+      // Clicking header when minimized expands it
+      mapBoxContainer.addEventListener('click', () => {
+        if (mapBoxContainer.classList.contains('minimized')) {
+          mapBoxContainer.classList.remove('minimized');
+          btnToggleMinimap.textContent = '— Min';
+        }
+      });
+    }
+
+    // Hotspots ON/OFF Toggle
+    let hotspotsVisible = false;
+    const btnToggleHotspots = document.getElementById('btn-toggle-hotspots');
+    const spotOverlayEl = document.getElementById('spot-hotspots-overlay');
+    if (btnToggleHotspots && spotOverlayEl) {
+      btnToggleHotspots.addEventListener('click', () => {
+        hotspotsVisible = !hotspotsVisible;
+        spotOverlayEl.classList.toggle('hidden', !hotspotsVisible);
+        rebuildSpotHotspots();
+        const lbl = document.getElementById('hotspots-btn-label');
+        if (lbl) lbl.textContent = hotspotsVisible ? '🏷️ Hotspots: ON' : '🏷️ Hotspots: OFF';
+      });
+    }
+
+    // Clean View Toggle
+    let isCleanView = false;
+    const btnCleanView = document.getElementById('btn-clean-view');
+    const appEl = document.getElementById('app') || document.body;
+    if (btnCleanView && appEl) {
+      btnCleanView.addEventListener('click', () => {
+        isCleanView = !isCleanView;
+        appEl.classList.toggle('clean-view', isCleanView);
+        const lbl = document.getElementById('clean-view-btn-label');
+        if (lbl) lbl.textContent = isCleanView ? '✕ Exit Clean View' : '👁️ Clean View';
+      });
+    }
+
+    // Sidebar Collapse & Expand Controls
+    const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+    const btnExpandSidebar = document.getElementById('btn-expand-sidebar');
+    const panel360El = document.getElementById('panel-360');
+    
+    function setSidebarVisible(visible) {
+      if (!panel360El) return;
+      if (visible) {
+        panel360El.style.display = 'flex';
+        panel360El.classList.remove('collapsed');
+        if (btnExpandSidebar) btnExpandSidebar.style.display = 'none';
+      } else {
+        panel360El.style.display = 'none';
+        panel360El.classList.add('collapsed');
+        if (btnExpandSidebar && activeMode === '360') btnExpandSidebar.style.display = 'block';
+      }
+    }
+
+    if (btnToggleSidebar) {
+      btnToggleSidebar.addEventListener('click', () => setSidebarVisible(false));
+    }
+    if (btnExpandSidebar) {
+      btnExpandSidebar.addEventListener('click', () => setSidebarVisible(true));
+    }
+    
     animate();
   </script>
 </body>

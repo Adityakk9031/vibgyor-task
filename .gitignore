@@ -14,3 +14,7 @@ Thumbs.db
 
 # Archives
 *.zip
+
+# AI finishing intermediates (rebuilt by pipeline/render_ai_bases.py and package_ai_inputs.py)
+outputs/ai_bases/
+outputs/ai_handoff/

@@ -387,6 +387,18 @@ AMENITY_SHOTS = [
         "resolution": (2560, 1440),
         "samples": 8,
     },
+    {
+        "id": "amenity_6_terrace_gym",
+        "filename": "amenities/amenity_6_terrace_gym.png",
+        "description": "Amenity 6: Terrace glass fitness gym pavilion (north deck)",
+        "mode": "interior",
+        "location": (8.90, 27.00, 26.25),
+        "target": (3.20, 35.50, 25.90),
+        "lens_mm": 17.0,
+        "shift_y": 0.0,
+        "resolution": (2560, 1440),
+        "samples": 8,
+    },
 ]
 
 INTERIOR_SHOTS = [
@@ -439,6 +451,18 @@ INTERIOR_SHOTS = [
         "resolution": (2560, 1440),
         "samples": 5,
     },
+    {
+        "id": "type_a_5_third_bedroom",
+        "filename": "interiors/type_a_5_third_bedroom.png",
+        "description": "Type A Interior 5: Third Bedroom (3.36 x 4.20 m, South-West, from the SW corner)",
+        "mode": "interior",
+        "location": (4.05, 4.70, 4.72),
+        "target": (6.60, 8.30, 4.50),
+        "lens_mm": 17.0,
+        "shift_y": 0.0,
+        "resolution": (2560, 1440),
+        "samples": 5,
+    },
     # --- TYPE B (Rear 4BHK, Floor 1: z_floor = 3.30m, eye height z = 4.72m) ---
     {
         "id": "type_b_1_drawing_room",
@@ -483,6 +507,18 @@ INTERIOR_SHOTS = [
         "mode": "interior",
         "location": (3.75, 33.85, 4.72),
         "target": (2.15, 35.85, 4.55),
+        "lens_mm": 17.0,
+        "shift_y": 0.0,
+        "resolution": (2560, 1440),
+        "samples": 5,
+    },
+    {
+        "id": "type_b_5_third_bedroom",
+        "filename": "interiors/type_b_5_third_bedroom.png",
+        "description": "Type B Interior 5: Third Bedroom (3.20 x 3.96 m, Middle-West, from the east wall)",
+        "mode": "interior",
+        "location": (3.25, 32.60, 4.72),
+        "target": (0.60, 30.40, 4.50),
         "lens_mm": 17.0,
         "shift_y": 0.0,
         "resolution": (2560, 1440),
