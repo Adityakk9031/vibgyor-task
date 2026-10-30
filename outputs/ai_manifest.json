@@ -1,0 +1,1009 @@
+{
+  "items": {
+    "amenity_3_entrance_lobby": {
+      "kind": "still",
+      "output": "01_amenity_3_entrance_lobby.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "406a99f76f07cd7fe3dca65624ff7dbefe550d22880dbb7ffba3f0b10149fc1d",
+      "uploaded_sha256": "25978aee064f7f8f5ce085e5d06856503059dd2080c570514f3251fe5f5ec273",
+      "layout_match": 0.785,
+      "output_sha256": "884e0304b0c209fa15629b507df945274345344f91feec17b1a4702f53143d38",
+      "files": [
+        "outputs/amenities/amenity_3_entrance_lobby.png",
+        "viewer/amenities/amenity_3_entrance_lobby.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_a_1_drawing_room": {
+      "kind": "still",
+      "output": "02_type_a_1_drawing_room.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "b33e5843d1d0536a55cf7e367103df0ba2928c6c0be6ce1b95ad8737d9a47dfb",
+      "uploaded_sha256": "4c2b33b4c64b38851385960dd324c520e6cd0912355daa88ba1d6c6a1837f1a9",
+      "layout_match": 0.755,
+      "output_sha256": "5291b9669e1609025fad09aecb3cfa0b3dbeade83edf1116792814609b0b2fe1",
+      "files": [
+        "outputs/interiors/type_a_1_drawing_room.png",
+        "viewer/interiors/type_a_1_drawing_room.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_a_2_kitchen_dining": {
+      "kind": "still",
+      "output": "03_type_a_2_kitchen_dining.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "0fccb8f0273a53ef811310fa74a3c9a802cc9a65760f700e0481b31ac692d5bd",
+      "uploaded_sha256": "2fe6c881c0b1268813672740365aab80991787436e9124ee4c59c5b5e2a888b2",
+      "layout_match": 0.817,
+      "output_sha256": "b0e82057312328565f651c35ae8c70f36d7db11bb04056aabf8dcde76e3b65e4",
+      "files": [
+        "outputs/interiors/type_a_2_kitchen_dining.png",
+        "viewer/interiors/type_a_2_kitchen_dining.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_a_3_master_bedroom": {
+      "kind": "still",
+      "output": "04_type_a_3_master_bedroom.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "2598634084b593169b2db384d748046b3ddf1c09defd99811dda8590b266139f",
+      "uploaded_sha256": "76a50902784d292607becc8fcfc482e8895030c038ed59b3ca940133f329db78",
+      "layout_match": 0.52,
+      "output_sha256": "e6ba7a99dba138495353ab84f76b0e57b25b2f13d91833e6e60f4322445d95a8",
+      "files": [
+        "outputs/interiors/type_a_3_master_bedroom.png",
+        "viewer/interiors/type_a_3_master_bedroom.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_b_1_drawing_room": {
+      "kind": "still",
+      "output": "05_type_b_1_drawing_room.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "41fc590403e20f5b09d2d9b318ffaafafa9723ff5328bab1f21890491e178908",
+      "uploaded_sha256": "ddd413f0fb63183730ba6461490ce1f2ef4a41091b5fe39605f86bb248ff016a",
+      "layout_match": 0.671,
+      "output_sha256": "d2981a6a74894c67d27a3c8d85d1b22b389a43bd0ac4a7d40ccade5acee75c23",
+      "files": [
+        "outputs/interiors/type_b_1_drawing_room.png",
+        "viewer/interiors/type_b_1_drawing_room.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_b_2_kitchen_dining": {
+      "kind": "still",
+      "output": "06_type_b_2_kitchen_dining.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "892f17b6bc4caa016db485b9dc1c8104249b296ec8bb0cd408f2e7805f287770",
+      "uploaded_sha256": "0fd0df097bb3469bcf3bb5a7171e7bfd0036affd39d17d2344d7b08057c0e59e",
+      "layout_match": 0.532,
+      "output_sha256": "1d0809ec50967a1660ad52b6cf835427f0e369bdd24eacabe982998e32cc90a0",
+      "files": [
+        "outputs/interiors/type_b_2_kitchen_dining.png",
+        "viewer/interiors/type_b_2_kitchen_dining.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_b_3_master_bedroom": {
+      "kind": "still",
+      "output": "07_type_b_3_master_bedroom.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "5dce5f0f24da7d21ee574f6597688e287840fc496ad95519ac17a8602db4ee70",
+      "uploaded_sha256": "fd3225f9d4b25320c82fae66c3c7fb6be03c65d05ce83259760322022b012822",
+      "layout_match": 0.378,
+      "output_sha256": "cc674346a9c782b46237b415d50eca46f799ba26e620a1544f5aa0b19c21237e",
+      "files": [
+        "outputs/interiors/type_b_3_master_bedroom.png",
+        "viewer/interiors/type_b_3_master_bedroom.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_a_4_second_bedroom": {
+      "kind": "still",
+      "output": "08_type_a_4_second_bedroom.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "27cce273c10a32c0e6a694ec82e52c998f66726494de7c678aa706fcc8059a03",
+      "uploaded_sha256": "8b313f584e238a8e675d6f934869a99ef72b3ca6be35ece498b595fba527149d",
+      "layout_match": 0.788,
+      "output_sha256": "c1270b5e8ad008dfd08c7a93fa9733bc9eca2a492caf04e8e6ae309eb042c1df",
+      "files": [
+        "outputs/interiors/type_a_4_second_bedroom.png",
+        "viewer/interiors/type_a_4_second_bedroom.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_b_4_second_bedroom": {
+      "kind": "still",
+      "output": "09_type_b_4_second_bedroom.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "86aa01e01757e7cd2c7a3023699d5fef03ebf08673b67cc85c0210257b100303",
+      "uploaded_sha256": "33157c215d10870e3740a1c03e95a9455eb2dc5d86abb24c1af59f9571c15ea3",
+      "layout_match": 0.715,
+      "output_sha256": "97f539bf512ea9dc389e862659f09eb7358cd071d63f2494904a4e79e5129f60",
+      "files": [
+        "outputs/interiors/type_b_4_second_bedroom.png",
+        "viewer/interiors/type_b_4_second_bedroom.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "shot_3_aerial_day": {
+      "kind": "still",
+      "output": "20_shot_3_aerial_day.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1672,
+        941
+      ],
+      "base_sha256": "82cbc7a803ce7fa1a9e5715fe7c3588cf565dd8b1a32f56e8c82dedd2f58a5c2",
+      "uploaded_sha256": "a34a7bbefbd08fa05917de4b0c93a462bab400d3ab6b3a8ba50203d54adcacbe",
+      "layout_match": 0.797,
+      "output_sha256": "71d3c4ba81d20b768bf0956f33965c217e467f63ddc30f366fb2f32b8c9897d2",
+      "files": [
+        "outputs/shot_3_aerial_day.png",
+        "viewer/exteriors/shot_3_aerial_day.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_a_5_third_bedroom": {
+      "kind": "still",
+      "output": "10_type_a_5_third_bedroom.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "29e20fe77024a8fd71bc15aae333ac2ea72bdf9753f70e6b0bcdaef6aa83908e",
+      "uploaded_sha256": "e1306ab5e3b5085b3219751505f794d407c17ed00cedacdccacfb96f8b48df2d",
+      "layout_match": 0.495,
+      "output_sha256": "af469d59557436e088f5ed6ab834d3014cdbff99ef9b2e14df2ceb7bcca4e84e",
+      "files": [
+        "outputs/interiors/type_a_5_third_bedroom.png",
+        "viewer/interiors/type_a_5_third_bedroom.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "type_b_5_third_bedroom": {
+      "kind": "still",
+      "output": "11_type_b_5_third_bedroom.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "cbc56adf104c520b30c61d60c65e82b55d1961baa459d49e17f34a68a6230e1f",
+      "uploaded_sha256": "813d9f1e6a25fa6c5c76ecd4b95572042a5f5fd00c63327f8dc7c688496e2847",
+      "layout_match": 0.9,
+      "output_sha256": "154254a01d3f6d310ce6a869600c6b5a00a09f256bf17c42cf082ef666ac5d12",
+      "files": [
+        "outputs/interiors/type_b_5_third_bedroom.png",
+        "viewer/interiors/type_b_5_third_bedroom.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "amenity_5_terrace_amenities": {
+      "kind": "still",
+      "output": "12_amenity_5_terrace_amenities.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "25c1ba98cc3d73f8509089acfe932acccc7c0e48dc43965ec076096e85d129bf",
+      "uploaded_sha256": "80c58de7a19a24b5487dfd28c369a6a689a4c7f116d58975054c7332ce6c6124",
+      "layout_match": 0.914,
+      "output_sha256": "531237d88088d4fbc4c430900392c7623a9376cb47e1582060464e9891b3a669",
+      "files": [
+        "outputs/amenities/amenity_5_terrace_amenities.png",
+        "viewer/amenities/amenity_5_terrace_amenities.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "amenity_6_terrace_gym": {
+      "kind": "still",
+      "output": "13_amenity_6_terrace_gym.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "3e88d20c9f69e6aa2ec458a039fa2ea99e2f5073a3ee373fc475077cd172e536",
+      "uploaded_sha256": "60856cd62f4d52c287d7df0dc84f8638c6333f8de8fdd54cb152bd3f429159fd",
+      "layout_match": 0.698,
+      "output_sha256": "16d3d8c6cf5d1daf5acca95058df598b65ad321cdcbdcc27f6874946e37b0dea",
+      "files": [
+        "outputs/amenities/amenity_6_terrace_gym.png",
+        "viewer/amenities/amenity_6_terrace_gym.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "amenity_1_basement_parking": {
+      "kind": "still",
+      "output": "14_amenity_1_basement_parking.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "9c9d963d77550d68541818c43c3007170ad72fb853215bd0d5eb9ceada6b6954",
+      "uploaded_sha256": "1063bebd3d843c74c03bf957d8eeb6fc9229148964ded67aec700283ac441412",
+      "layout_match": 0.57,
+      "output_sha256": "35aa743738d429e1534f01fe9cede4349d1d383bb84e231e82b54ef9bfae54a0",
+      "files": [
+        "outputs/amenities/amenity_1_basement_parking.png",
+        "viewer/amenities/amenity_1_basement_parking.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "amenity_2_stilt_parking": {
+      "kind": "still",
+      "output": "15_amenity_2_stilt_parking.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "66d4b29c2dbf52e7dd9947464fbf58c5c47fefafabc509f4d28f26b2bf53672c",
+      "uploaded_sha256": "abba4fa5ed2b53a8a4f7382aef2b412fe88c7e20cdc74684f067a302f0160f06",
+      "layout_match": 0.807,
+      "output_sha256": "3534cb368943516bcbb411722887d3f1d4fc1ada05a509b72edeabbcad6c68d9",
+      "files": [
+        "outputs/amenities/amenity_2_stilt_parking.png",
+        "viewer/amenities/amenity_2_stilt_parking.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "amenity_4_landscape_drive": {
+      "kind": "still",
+      "output": "16_amenity_4_landscape_drive.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "73c95bb71e376777a477b1bc08eb4ace8cbd7ac5f89c7cf85dca89b8f042c315",
+      "uploaded_sha256": "69d14a49c69adb0ca345fa3c61c6e07657dd62cbaf2dc7b1211ea3eebce2eb14",
+      "layout_match": 0.841,
+      "output_sha256": "3b8c2b462d864ca175ffde0569dfcc09ab371a277a6e366d8473ebb413f89efe",
+      "files": [
+        "outputs/amenities/amenity_4_landscape_drive.png",
+        "viewer/amenities/amenity_4_landscape_drive.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "shot_1_eye_level_day": {
+      "kind": "still",
+      "output": "17_shot_1_eye_level_day.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "134e19210e29cf3fb0539789d5112fdfbe9f59907cc845f392e929c08ab6f504",
+      "uploaded_sha256": "4b71ed8646140bb746130f6a9069139a1a493eff1f77c42185e5820e3ea2c5f5",
+      "layout_match": 0.795,
+      "output_sha256": "793bf2f0a1381401dc9bb2731b63985fdee040164f005b1c0805caf9bfd1e584",
+      "files": [
+        "outputs/shot_1_eye_level_day.png",
+        "viewer/exteriors/shot_1_eye_level_day.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "shot_4_entrance_closeup": {
+      "kind": "still",
+      "output": "18_shot_4_entrance_closeup.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "325469f11c76e2730c181bdfd619f17333760ec73c31cf74ae4916177395f50e",
+      "uploaded_sha256": "089d02ec58d10318e015fdd8f4d385b11833d5d7a2a7efe9ad7d36c9b5ad4930",
+      "layout_match": 0.677,
+      "output_sha256": "8853c561c5963802b8532295daadf3d6f11e14fe7e46f5a1d4905d8d8a31294b",
+      "files": [
+        "outputs/shot_4_entrance_closeup.png",
+        "viewer/exteriors/shot_4_entrance_closeup.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "shot_2_front_corner_dusk": {
+      "kind": "still",
+      "output": "19_shot_2_front_corner_dusk.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "source_size": [
+        1344,
+        756
+      ],
+      "base_sha256": "f46cac3936196e91ce7438f2a26f754a2a7191aa3d78140f7c822d11c90c6c7e",
+      "uploaded_sha256": "6624f92d17b8dcb06cdd0d3f5a6fc38d082f0d81c1a996e646739c1bc11d9e72",
+      "layout_match": 0.815,
+      "output_sha256": "2fb1c2069456e8e9f50aeac535d97301c1353c7451f7ca059a2682b79bedc2cb",
+      "files": [
+        "outputs/shot_2_front_corner_dusk.png",
+        "viewer/exteriors/shot_2_front_corner_dusk.png"
+      ],
+      "source": "MyArchitectAI Render of a Blender render of outputs/vibgyor.blend"
+    },
+    "pano_type_a_1_drawing_room": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_a_1_drawing_room.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "96e7a1792c7b9b7b60a17b2576ff96908479f68bc197a87e5c452855c068fa83",
+      "depth_sha256": "45579f7dd141039482ef5452264ad701827143081a3c9682c5aaadf753ad76c9",
+      "prompt": "living room, sofa, coffee table, fluted wood TV wall, large clear glass sliding door to a sunny balcony, light oak herringbone floor, boucle upholstery, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_a_1_drawing_room.jpg",
+      "seed": 201,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.902,
+      "output_sha256": "dbb3b010b69e3fe736ee1cc093793abd3c5312bf8a96e76738c391379ce58fdd",
+      "files": [
+        "outputs/panoramas/pano_type_a_1_drawing_room.png",
+        "viewer/panoramas/pano_type_a_1_drawing_room.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_bldg_1_entrance_gate": {
+      "kind": "pano",
+      "output": "panoramas/pano_bldg_1_entrance_gate.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "da45397fbbf3945bb0d9be0a4e6a3c345707339264ca6050f21c2857e1787030",
+      "depth_sha256": "bc16dfe54bfc3e13537237a641774eda660b1df2da89aa4c8de3caaa103d4763",
+      "prompt": "entrance gate of a modern residential tower, canopy with timber soffit, stone compound wall, security cabin, granite driveway, tropical planting, bright daylight, architectural photograph, realistic materials, sharp detail",
+      "style_ref": null,
+      "seed": 101,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.575,
+      "output_sha256": "56b043aeeeb14c0eeac63fa59a56705d7c49997615880ea20dbc2d61866835ae",
+      "files": [
+        "outputs/panoramas/pano_bldg_1_entrance_gate.png",
+        "viewer/panoramas/pano_bldg_1_entrance_gate.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_bldg_2_entrance_lobby": {
+      "kind": "pano",
+      "output": "panoramas/pano_bldg_2_entrance_lobby.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "96cedf9f0a5d40948f66ffef51ea1186493feaa964dd022e53e4dac37d5c08cf",
+      "depth_sha256": "cc0f8f08933333dfe12ce6a6f193ef0aef69faca43f7e6972a6c65f3f1bae674",
+      "prompt": "luxury residential entrance lobby, travertine marble walls and floor, fluted walnut panels, bronze elevator doors, ring chandelier, lounge seating, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/amenity_3_entrance_lobby.jpg",
+      "seed": 102,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.879,
+      "output_sha256": "774226d699da031c900975604d9100079ea833348f40df38b1b04780de2d32eb",
+      "files": [
+        "outputs/panoramas/pano_bldg_2_entrance_lobby.png",
+        "viewer/panoramas/pano_bldg_2_entrance_lobby.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_bldg_3_basement_parking": {
+      "kind": "pano",
+      "output": "panoramas/pano_bldg_3_basement_parking.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "466cb4920acfdeff52026ad5723c6ccc24e41dcdd420ab92a7d69befc37cfd41",
+      "depth_sha256": "6c41034672232f943325409285dcf3768ef1127788cecd0594607468f2b0803e",
+      "prompt": "underground residential car park, parked cars and scooters, grey epoxy floor, yellow parking bay lines, concrete columns with yellow and black safety bands, linear LED ceiling lights, architectural photograph, realistic materials, sharp detail",
+      "style_ref": "style/amenity_1_basement_parking.jpg",
+      "seed": 103,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.769,
+      "output_sha256": "a7229c68a75c95071bbb1ad5e63e4be18408af1bdbaa1bedaa9f8d27a822f7ed",
+      "files": [
+        "outputs/panoramas/pano_bldg_3_basement_parking.png",
+        "viewer/panoramas/pano_bldg_3_basement_parking.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_bldg_4_garden_stilt": {
+      "kind": "pano",
+      "output": "panoramas/pano_bldg_4_garden_stilt.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "1102b8643a1d1285afbcedfffb63e06b8291f80a870ea1e06d5f7c5c40c118fb",
+      "depth_sha256": "c3405b8a230e9bdd90601ac9d2b7272c30eec787b118223ed918a94867cb40fe",
+      "prompt": "covered stilt parking under a residential tower, parked cars, concrete columns, paved driveway, parking bay markings, landscaped garden edge, daylight, architectural photograph, realistic materials, sharp detail",
+      "style_ref": "style/amenity_2_stilt_parking.jpg",
+      "seed": 104,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.933,
+      "output_sha256": "ba683b659a3d84840a0f1e64e9c79f6bd1e719983ffd27bead8dab76affcd32f",
+      "files": [
+        "outputs/panoramas/pano_bldg_4_garden_stilt.png",
+        "viewer/panoramas/pano_bldg_4_garden_stilt.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_bldg_5_terrace_pergola_kids": {
+      "kind": "pano",
+      "output": "panoramas/pano_bldg_5_terrace_pergola_kids.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "a1029bc4cd46166ae9998db4b70dd1caa4dc2807f720668cc14807216dc3bf24",
+      "depth_sha256": "dd8c9af63ce78a79c7eafe5d229b417f32cffb12d5f52b03184fbed3ac0c5278",
+      "prompt": "rooftop terrace of a residential tower, slatted timber pergola lounge, outdoor sofas, artificial turf play area, planters, blue sky, architectural photograph, realistic materials, sharp detail",
+      "style_ref": "style/amenity_5_terrace_amenities.jpg",
+      "seed": 105,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.921,
+      "output_sha256": "fab973653a84693a204eecada3358dd26ece73de633553316a5500c2797c9027",
+      "files": [
+        "outputs/panoramas/pano_bldg_5_terrace_pergola_kids.png",
+        "viewer/panoramas/pano_bldg_5_terrace_pergola_kids.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_bldg_6_terrace_gym": {
+      "kind": "pano",
+      "output": "panoramas/pano_bldg_6_terrace_gym.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "a88ac443b9255cb6c886566a2aaff0a5a6db30a562469293e1099f510bf1206f",
+      "depth_sha256": "2ef77830c9e4ccd9e1f8aacea17fc7644cd4f92be4a98dbf282904cedce167a5",
+      "prompt": "rooftop glass fitness studio, gym equipment, rubber floor, floor-to-ceiling glass walls, skyline view, daylight, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/amenity_6_terrace_gym.jpg",
+      "seed": 106,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.904,
+      "output_sha256": "ac933ca30d6bb35ed75541daf4787eba2fa14a03a01a7b819bfb3c5f80d87e93",
+      "files": [
+        "outputs/panoramas/pano_bldg_6_terrace_gym.png",
+        "viewer/panoramas/pano_bldg_6_terrace_gym.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_a_2_dining_kitchen": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_a_2_dining_kitchen.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "c3ce539b9873864577134190c7c4329fc4c3bd9b030baa3422b7aab239500a6d",
+      "depth_sha256": "00c5eb03c8f933188b746bbe6750c75fd1b495c8d7b062035ec66a1cfe40fbd7",
+      "prompt": "open kitchen and dining room, quartz countertops, wooden dining table and chairs, pendant lights, light oak floor, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_a_2_kitchen_dining.jpg",
+      "seed": 202,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.844,
+      "output_sha256": "93a163a44eb80a844815eceed85ba8689b693dcdeb74f62d67bb32063ef51c2a",
+      "files": [
+        "outputs/panoramas/pano_type_a_2_dining_kitchen.png",
+        "viewer/panoramas/pano_type_a_2_dining_kitchen.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_a_3_master_bedroom": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_a_3_master_bedroom.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "641a6df9a5e1be518caf27d665ae1f710f773c02b2880fa1d8e3745588c20c40",
+      "depth_sha256": "ae29245db4303bb4cb03c1e5f67b52d2f6817885ce01f2e39fc2873462a12a37",
+      "prompt": "master bedroom, upholstered king bed with linen bedding, fluted wood headboard wall, bedside tables and lamps, wardrobe, light oak floor, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_a_3_master_bedroom.jpg",
+      "seed": 203,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.753,
+      "output_sha256": "1748a100d837274722d50b86b9fd53f1a0a487c6c5f16a49e26ef2d9e4ff0f66",
+      "files": [
+        "outputs/panoramas/pano_type_a_3_master_bedroom.png",
+        "viewer/panoramas/pano_type_a_3_master_bedroom.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_a_4_second_bedroom": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_a_4_second_bedroom.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "cc0455ae4f3b26709e44b7270d734c3b499e2f90e3e275a8b2bbcf5bd8dbb31d",
+      "depth_sha256": "a2831836527bc6695459d7c5cc058b82f67b79c837994bd945243727a072caeb",
+      "prompt": "bedroom, upholstered bed with linen bedding, wood panel headboard wall, bedside tables, wardrobe, light oak floor, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_a_4_second_bedroom.jpg",
+      "seed": 204,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.747,
+      "output_sha256": "30c4ed15e45668c2cf383caff5a29fadbd4b53ebf7334792ce205b73fd0dd5cf",
+      "files": [
+        "outputs/panoramas/pano_type_a_4_second_bedroom.png",
+        "viewer/panoramas/pano_type_a_4_second_bedroom.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_a_5_balcony_deck": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_a_5_balcony_deck.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "c5f83559769db090e2e4ebd599870a5930943749246e3706423bb25eb7c994b2",
+      "depth_sha256": "ac6f479c9db5057f8b0f50ff5e84dc577d97c5961d35ded9d2c68b8fc749b5aa",
+      "prompt": "bedroom, upholstered bed with linen bedding, wood panel headboard wall, bedside tables, wardrobe, light oak floor, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_a_5_third_bedroom.jpg",
+      "seed": 205,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.789,
+      "output_sha256": "1e10eab300d5231a441bf32d9a9cfbee4973b4cf32cdada50bb44eec6db21575",
+      "files": [
+        "outputs/panoramas/pano_type_a_5_balcony_deck.png",
+        "viewer/panoramas/pano_type_a_5_balcony_deck.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_b_1_drawing_room": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_b_1_drawing_room.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "a1c628b93420911a2eca6a1853d0f6b235186023efe0aa72041128fd285db7f8",
+      "depth_sha256": "24e924dde4e9ff4c937919728f2086feaa0ea1288ff286491f2ce39498e957c4",
+      "prompt": "living room, sofa, coffee table, fluted wood TV wall, large clear glass sliding door to a sunny balcony, light oak herringbone floor, boucle upholstery, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_b_1_drawing_room.jpg",
+      "seed": 301,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.826,
+      "output_sha256": "522b333b6b44791a1d110049eed71a2abbc24866bb31304530bcfc52e07321c7",
+      "files": [
+        "outputs/panoramas/pano_type_b_1_drawing_room.png",
+        "viewer/panoramas/pano_type_b_1_drawing_room.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_b_2_dining_kitchen": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_b_2_dining_kitchen.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "8ef5e8cdbfdd84ad09dd4096476f6344b09c3f5f62a4732332be4381bf5d26b6",
+      "depth_sha256": "887d5253b12d4a60ee3bfafb9b02140f40e2d1b197d723fe3ea68d7192283835",
+      "prompt": "open kitchen and dining room, quartz countertops, wooden dining table and chairs, pendant lights, light oak floor, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_b_2_kitchen_dining.jpg",
+      "seed": 302,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.815,
+      "output_sha256": "4fda50a8cc21c810793de8625a4df18998f078641fab16ce9fd8f2af53a5ef61",
+      "files": [
+        "outputs/panoramas/pano_type_b_2_dining_kitchen.png",
+        "viewer/panoramas/pano_type_b_2_dining_kitchen.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_b_3_master_bedroom": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_b_3_master_bedroom.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "aa03d0ac333c1cf43772c4cffdba0666de155d267e7dcba076007de03ecd69c0",
+      "depth_sha256": "de3769a89d2bf1a9ae9a08795bcc49a2f1428834e7e77d09b4d770ea4f4c02c8",
+      "prompt": "master bedroom, upholstered king bed with linen bedding, fluted wood headboard wall, bedside tables and lamps, wardrobe, light oak floor, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_b_3_master_bedroom.jpg",
+      "seed": 303,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.776,
+      "output_sha256": "4ebd481434d5dccc12d4ebd1565afea566b488618ef01ca18f7956c0916c500f",
+      "files": [
+        "outputs/panoramas/pano_type_b_3_master_bedroom.png",
+        "viewer/panoramas/pano_type_b_3_master_bedroom.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_b_4_second_bedroom": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_b_4_second_bedroom.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "6d3a4b121c2e138a0cf1f80344dd2ef0d266170ecec94b28d0c45e5167b7709b",
+      "depth_sha256": "690665c8c848a73e5af5bb17ee003edd83bc6fb013ffe39434de2976fe0ddca2",
+      "prompt": "bedroom, upholstered bed with linen bedding, wood panel headboard wall, bedside tables, wardrobe, light oak floor, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_b_4_second_bedroom.jpg",
+      "seed": 304,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.905,
+      "output_sha256": "9723a289b912721a7de7e23a1e46acb95bbb7174661f53bbeb4d591827182029",
+      "files": [
+        "outputs/panoramas/pano_type_b_4_second_bedroom.png",
+        "viewer/panoramas/pano_type_b_4_second_bedroom.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    },
+    "pano_type_b_5_balcony_deck": {
+      "kind": "pano",
+      "output": "panoramas/pano_type_b_5_balcony_deck.png",
+      "size": [
+        6144,
+        3072
+      ],
+      "base_sha256": "61767f1eeadbbdf423a8582129a521163e6a1f385451c6cba19a150e7f78421d",
+      "depth_sha256": "376443cd1d790ae2c0861728522b2c4815390b8d1036d6876715383ac95d42c3",
+      "prompt": "bedroom, upholstered bed with linen bedding, wood panel headboard wall, bedside tables, wardrobe, light oak floor, sheer curtains, architectural interior photograph, luxury Scandinavian apartment, bright natural daylight through clear glass, soft shadows, warm cove lighting, realistic contrast",
+      "style_ref": "style/type_b_5_third_bedroom.jpg",
+      "seed": 305,
+      "settings": {
+        "work_width": 2048,
+        "pad": 128,
+        "strength": 0.7,
+        "steps": 30,
+        "guidance": 5.0,
+        "depth_scale": 0.5,
+        "canny_scale": 0.45,
+        "control_end": 0.8,
+        "seam_strength": 0.45,
+        "cap_strength": 0.4,
+        "refine_strength": 0.3,
+        "refine_steps": 20,
+        "out_width": 6144,
+        "style_scale": 0.35
+      },
+      "layout_match": 0.688,
+      "output_sha256": "9d7b80f870098701e3d08d8664d5d484364b1c0e3410013abdeaddffdfff1bf2",
+      "files": [
+        "outputs/panoramas/pano_type_b_5_balcony_deck.png",
+        "viewer/panoramas/pano_type_b_5_balcony_deck.png"
+      ],
+      "source": "Blender render of outputs/vibgyor.blend (built from SUBMISSION - 04.dxf), finished by pipeline/finish_ai.py"
+    }
+  },
+  "models": {
+    "base": "SG161222/RealVisXL_V5.0",
+    "vae": "madebyollin/sdxl-vae-fp16-fix",
+    "controlnet_depth": "xinsir/controlnet-depth-sdxl-1.0",
+    "controlnet_canny": "xinsir/controlnet-canny-sdxl-1.0",
+    "ip_adapter": "h94/IP-Adapter",
+    "ip_adapter_weight": "sdxl_models/ip-adapter_sdxl_vit-h.safetensors",
+    "ip_adapter_encoder": "models/image_encoder"
+  }
+}
